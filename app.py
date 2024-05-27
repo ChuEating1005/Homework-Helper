@@ -3,39 +3,22 @@
 from flask import Flask, request, abort
 import os
 from linebot import LineBotApi, WebhookHandler
-from langchain_openai import ChatOpenAI
 from linebot.exceptions import InvalidSignatureError
-
 from linebot.models import *
 
 import tempfile
 
-from openAI_utils import process_pdf_file, handle_conversation, clear_memory,get_user_memory
+from openAI_utils import process_pdf_file, handle_conversation
 
+#執行檔案
 app = Flask(__name__)
-
-llm = None
-user_memory = {}
-
-def initialize_openai():
-    global llm
-    if llm is None:
-        openai_api_key = os.getenv('OPENAI_API_KEY')
-        if not openai_api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
-        llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key)
-        print("OpenAI initialized")
-        
-# 初始化 OpenAI
-initialize_openai()
 
 # 必須放上自己的Channel Access Token
 line_bot_api = LineBotApi('9hDQFa2YiPRhlPPm+mE4DOdjBVJ62Nf2MekyiecaFFMKH3n9LxiiNTGwNjlH4Q4fxyoz+rU8yBb+QFoupFlI3wn0VUhWbq4tZoxgbx6xj1cxjnCpihFcvUM8HtRUj+RANUOK5I/63fDIV8kfubdTTwdB04t89/1O/w1cDnyilFU=')
 # 必須放上自己的Channel Secret
 handler = WebhookHandler('946262b6de4a50790330570dc37e6b3b')
 
-
-# 監聽所有來自 /callback 的 Post Request
+# 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -54,12 +37,12 @@ def callback():
     return 'OK'
 
 #訊息傳遞區塊
-##### 基本上程式編輯都在這個function #####
+# 處理file message
 @handler.add(MessageEvent, message=FileMessage)
 def handle_message(event):
-    # message = TextSendMessage(text=event.message.text)
-    # line_bot_api.reply_message(event.reply_token,message)
+    # 取得使用者id
     user_id = event.source.user_id
+    #把讀進來的檔案存成暫存檔
     file_message = event.message
     file_content = line_bot_api.get_message_content(file_message.id)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
@@ -67,38 +50,30 @@ def handle_message(event):
             temp_file.write(chunk)
         temp_file_path = temp_file.name
         
-    # Process the PDF file
     try:
-        response = process_pdf_file(user_id, temp_file_path)
-        reply_message = TextSendMessage(text=response)
+        #丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
+        response = process_pdf_file(temp_file_path)
     except Exception as e:
-        reply_message = TextSendMessage(text=f"Failed to process the PDF file: {str(e)}")
+        response = f"Failed to process the PDF file: {str(e)}"
     finally:
-        os.remove(temp_file_path)  # Clean up the temporary file
-        
-   # reply_message = TextSendMessage(text="Received file: " + file_message.file_name)
-    line_bot_api.reply_message(event.reply_token, reply_message)
-    
+        os.remove(temp_file_path)  # 清掉暫存檔
+    #傳結果訊息給使用者
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=response))
+
+# 處理text message
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
-    # 接收到文本消息时执行的代码
+    # 取得使用者id
     user_id = event.source.user_id
-    input_text = event.message.text  # 获取用户发送的文本
-    if input_text == "clear":
-        clear_memory(user_id)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="已清空对话历史")  # 发送回复
-        )
-        return
+    # 讀取使用者傳來的訊息
+    input_text = event.message.text 
     try:
-        response = handle_conversation(user_id,input_text)
+        # 處理對話 回傳openAI的回應
+        response = handle_conversation(input_text)
     except Exception as e:
-        reply_message = TextSendMessage(text=f"Failed to text: {str(e)}")
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=response)  # 发送回复
-    )
+        response= f"Failed to text: {str(e)}"
+    #傳結果訊息給使用者
+    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=response))
 
 #主程式
 import os

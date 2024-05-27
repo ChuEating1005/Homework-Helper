@@ -5,30 +5,20 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain.memory import ConversationBufferMemory
 #load_dotenv()
 import os
-from app import llm, user_memory  # 导入全局变量
-def get_user_memory(user_id):
-    if user_id not in user_memory:
-        user_memory[user_id] = ConversationBufferMemory()
-    return user_memory[user_id]
-        
+
+# 讀取暫存檔的路徑 丟給openAI處理 回傳回應
 def process_pdf_file(user_id,file_path):
-    memory = get_user_memory(user_id)
+    # 初始化openAI
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key)
     loader = PyPDFLoader(file_path)
     pdf_text= loader.load_and_split()
-    combined_input = pdf_text[0].page_content 
-    memory.chat_memory.add_user_message(combined_input)
-    response = llm.invoke(str(memory.chat_memory.messages) + "\n這篇文章的大綱是什麼,用繁體中文回答").content  +"\nhistory:"+ str(memory.chat_memory.messages)
-    memory.chat_memory.add_ai_message(response)
+    response = llm.invoke((pdf_text[0].page_content) + "\n這篇文章的大綱是什麼,用繁體中文回答").content  
     return response
 
-def handle_conversation(user_id,input_text):
-    memory = get_user_memory(user_id)
-    memory.chat_memory.add_user_message(input_text)
-    response = llm.invoke(memory.chat_memory.messages).content +"\nhistory:"+ str(memory.chat_memory.messages)
-    
-    memory.chat_memory.add_ai_message(response)
+# 把對話內容丟給OPENAI回答
+def handle_conversation(input_text):
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key)
+    response = llm.invoke(input_text).content 
     return response
-
-def clear_memory(user_id):
-    memory = get_user_memory(user_id)
-    memory.chat_memory.clear()
