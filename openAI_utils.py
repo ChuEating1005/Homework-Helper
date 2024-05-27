@@ -30,5 +30,5 @@ def handle_conversation(user_id,input_text):
     return response
 
 def clear_memory(user_id):
-    if user_id in user_memory:
-        user_memory[user_id].chat_memory.clear()
+    memory = get_user_memory(user_id)
+    memory.chat_memory.clear()
