@@ -16,7 +16,7 @@ def initialize_openai():
         memory = ConversationBufferMemory()
         
 def process_pdf_file(file_path):
-    #initialize_openai()
+    initialize_openai()
     loader = PyPDFLoader(file_path)
     pdf_text= loader.load_and_split()
     combined_input = pdf_text[0].page_content 
@@ -26,7 +26,7 @@ def process_pdf_file(file_path):
     return response
 
 def handle_conversation(input_text):
-    #initialize_openai()
+    initialize_openai()
     memory.chat_memory.add_user_message(input_text)
     response = llm.invoke(memory.chat_memory.messages).content +"\nhistory:"+ str(memory.chat_memory.messages)
     
