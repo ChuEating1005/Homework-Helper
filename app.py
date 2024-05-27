@@ -38,6 +38,7 @@ def callback():
 
     return 'OK'
 
+
 #訊息傳遞區塊
 # 處理file message
 @handler.add(MessageEvent, message=FileMessage)
