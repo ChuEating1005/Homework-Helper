@@ -1,20 +1,16 @@
 from openai import OpenAI
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-import fitz 
+from langchain_community.document_loaders import PyPDFLoader
+
 load_dotenv()
 
-def extract_text_from_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
-    text = ""
-    for page in doc:
-        text += page.get_text()
-    doc.close()
-    return text
+
 llm = ChatOpenAI()
-pdf_text = extract_text_from_pdf("test.pdf")
+loader = PyPDFLoader("test.pdf")
+pdf_text= loader.load_and_split()
 user_question = input("請輸入你的問題: ")
-combined_input = pdf_text + "\n這段文字的大綱" 
+combined_input = pdf_text[0].page_content + "\n這段文字的大綱" 
 response = llm.invoke(combined_input).content
 print("AI 回應:", response)
 # llm = ChatOpenAI()
