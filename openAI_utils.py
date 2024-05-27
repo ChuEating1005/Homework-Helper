@@ -2,19 +2,30 @@
 from langchain_openai import ChatOpenAI
 #from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
+from langchain.memory import ConversationBufferMemory
 #load_dotenv()
 import os
+memory = ConversationBufferMemory()
+openai_api_key = os.getenv('OPENAI_API_KEY')
+llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key)
 
 def process_pdf_file(file_path):
-    openai_api_key = os.getenv('OPENAI_API_KEY')
-    llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key)
     loader = PyPDFLoader(file_path)
     pdf_text= loader.load_and_split()
     combined_input = pdf_text[0].page_content 
-    response = llm.invoke(combined_input).content + "\nwhat is the main point of the text"
+    memory.add_user_message(combined_input)
+    response = llm.invoke(memory.get_messages()).content + "\n這篇文章的大綱是什麼,用繁體中文回答"
+    memory.add_ai_message(response)
     return response
 
+def handle_conversation(input_text):
+    memory.add_user_message(input_text)
+    response = llm.invoke(memory.get_messages()).content
+    memory.add_ai_message(response)
+    return response
 
+def clear_memory():
+    memory.clear()
 # llm = ChatOpenAI()
 # while(True):
 #     print("input:")

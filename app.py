@@ -2,17 +2,15 @@
 #載入LineBot所需要的套件
 from flask import Flask, request, abort
 import os
-from linebot import (
-    LineBotApi, WebhookHandler
-)
-from linebot.exceptions import (
-    InvalidSignatureError
-)
+from linebot import LineBotApi, WebhookHandler
+
+from linebot.exceptions import InvalidSignatureError
+
 from linebot.models import *
 
 import tempfile
 
-from pdf_processor import process_pdf_file
+from openAI_utils import process_pdf_file, handle_conversation, clear_memory
 
 app = Flask(__name__)
 
@@ -70,10 +68,17 @@ def handle_message(event):
 def handle_text_message(event):
     # 接收到文本消息时执行的代码
     input_text = event.message.text  # 获取用户发送的文本
-    reply_text = f"You said: {input_text}"  # 构造回复内容
+    if input_text == "clear":
+        clear_memory()
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="已清空对话历史")  # 发送回复
+        )
+        return
+    response = handle_conversation(input_text)
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=reply_text)  # 发送回复
+        TextSendMessage(text=response)  # 发送回复
     )
 
 #主程式
