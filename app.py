@@ -14,9 +14,11 @@ from openAI_utils import process_pdf_file, handle_conversation
 app = Flask(__name__)
 
 # 必須放上自己的Channel Access Token
-line_bot_api = LineBotApi('9hDQFa2YiPRhlPPm+mE4DOdjBVJ62Nf2MekyiecaFFMKH3n9LxiiNTGwNjlH4Q4fxyoz+rU8yBb+QFoupFlI3wn0VUhWbq4tZoxgbx6xj1cxjnCpihFcvUM8HtRUj+RANUOK5I/63fDIV8kfubdTTwdB04t89/1O/w1cDnyilFU=')
+linebot_api_key = os.getenv('LINE_BOT_API_KEY')
+line_bot_api = LineBotApi(linebot_api_key)
 # 必須放上自己的Channel Secret
-handler = WebhookHandler('946262b6de4a50790330570dc37e6b3b')
+linebot_handler = os.getenv('LINE_BOT_HANDLER')
+handler = WebhookHandler(linebot_handler)
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
