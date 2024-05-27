@@ -10,7 +10,7 @@ from linebot.models import *
 
 import tempfile
 
-from openAI_utils import process_pdf_file, handle_conversation, clear_memory
+from openAI_utils import process_pdf_file, handle_conversation, clear_memory,initialize_openai
 
 app = Flask(__name__)
 
@@ -19,7 +19,6 @@ line_bot_api = LineBotApi('9hDQFa2YiPRhlPPm+mE4DOdjBVJ62Nf2MekyiecaFFMKH3n9LxiiN
 # 必須放上自己的Channel Secret
 handler = WebhookHandler('946262b6de4a50790330570dc37e6b3b')
 
-line_bot_api.push_message('Udb9f6efb644b35a32f17265476f9a2dc', TextSendMessage(text='你可以開始了'))
 
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
@@ -87,5 +86,6 @@ def handle_text_message(event):
 #主程式
 import os
 if __name__ == "__main__":
+    initialize_openai() 
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
