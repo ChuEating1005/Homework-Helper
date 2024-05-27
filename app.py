@@ -10,7 +10,7 @@ from linebot.models import *
 
 import tempfile
 
-from openAI_utils import process_pdf_file, handle_conversation, clear_memory,initialize_openai
+from openAI_utils import process_pdf_file, handle_conversation, clear_memory
 
 app = Flask(__name__)
 
@@ -75,7 +75,10 @@ def handle_text_message(event):
             TextSendMessage(text="已清空对话历史")  # 发送回复
         )
         return
-    response = handle_conversation(input_text)
+    try:
+        response = handle_conversation(input_text)
+    except Exception as e:
+        reply_message = TextSendMessage(text=f"Failed to text: {str(e)}")
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=response)  # 发送回复
@@ -84,6 +87,5 @@ def handle_text_message(event):
 #主程式
 import os
 if __name__ == "__main__":
-    initialize_openai()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
