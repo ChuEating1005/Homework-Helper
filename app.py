@@ -75,6 +75,16 @@ def handle_message(event):
         
    # reply_message = TextSendMessage(text="Received file: " + file_message.file_name)
     line_bot_api.reply_message(event.reply_token, reply_message)
+    
+@handler.add(MessageEvent, message=TextMessage)
+def handle_text_message(event):
+    # 接收到文本消息时执行的代码
+    input_text = event.message.text  # 获取用户发送的文本
+    reply_text = f"You said: {input_text}"  # 构造回复内容
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=reply_text)  # 发送回复
+    )
 
 #主程式
 import os
