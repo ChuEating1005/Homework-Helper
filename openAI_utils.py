@@ -7,7 +7,7 @@ from langchain.memory import ConversationBufferMemory
 import os
 
 # 讀取暫存檔的路徑 丟給openAI處理 回傳回應
-def process_pdf_file(user_id,file_path):
+def process_pdf_file(file_path):
     # 初始化openAI
     openai_api_key = os.getenv('OPENAI_API_KEY')
     llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai_api_key)
