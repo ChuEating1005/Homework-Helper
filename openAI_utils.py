@@ -13,15 +13,15 @@ def process_pdf_file(file_path):
     loader = PyPDFLoader(file_path)
     pdf_text= loader.load_and_split()
     combined_input = pdf_text[0].page_content 
-    memory.add_user_message(combined_input)
+    memory.chat_memory.add_user_message(combined_input)
     response = llm.invoke(memory.get_messages()).content + "\n這篇文章的大綱是什麼,用繁體中文回答"
-    memory.add_ai_message(response)
+    memory.chat_memory.add_ai_message(response)
     return response
 
 def handle_conversation(input_text):
-    memory.add_user_message(input_text)
+    memory.chat_memory.add_user_message(input_text)
     response = llm.invoke(memory.get_messages()).content
-    memory.add_ai_message(response)
+    memory.chat_memory.add_ai_message(response)
     return response
 
 def clear_memory():
