@@ -1,7 +1,8 @@
 from openai import OpenAI
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-import fitz 
+import fitz
+import os
 load_dotenv()
 
 def extract_text_from_pdf(pdf_path):
@@ -11,7 +12,9 @@ def extract_text_from_pdf(pdf_path):
         text += page.get_text()
     doc.close()
     return text
-llm = ChatOpenAI()
+model_name = "gpt-3.5-turbo"
+openai_api_key = os.getenv("OPENAI_API_KEY")
+llm = ChatOpenAI(model=model_name)
 pdf_text = extract_text_from_pdf("test.pdf")
 user_question = input("請輸入你的問題: ")
 combined_input = pdf_text + "\n這段文字的大綱" 
