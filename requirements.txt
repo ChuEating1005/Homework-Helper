@@ -12,4 +12,3 @@ gunicorn
 python-dotenv
 langchain_openai
 langchain_community
-python-3.9.19
