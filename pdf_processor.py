@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 load_dotenv()
 
-def pdf_reader(file_path):
+def process_pdf_file(file_path):
     llm = ChatOpenAI(model="gpt-3.5-turbo")
     loader = PyPDFLoader(file_path)
     pdf_text= loader.load_and_split()
