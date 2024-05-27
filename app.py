@@ -11,7 +11,7 @@ Line Bot機器人串接與測試
 """
 #載入LineBot所需要的套件
 from flask import Flask, request, abort
-
+import os
 from linebot import (
     LineBotApi, WebhookHandler
 )
@@ -49,10 +49,17 @@ def callback():
 
 #訊息傳遞區塊
 ##### 基本上程式編輯都在這個function #####
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=FileMessage)
 def handle_message(event):
-    message = TextSendMessage(text=event.message.text)
-    line_bot_api.reply_message(event.reply_token,message)
+    # message = TextSendMessage(text=event.message.text)
+    # line_bot_api.reply_message(event.reply_token,message)
+    file_message = event.message
+    file_content = line_bot_api.get_message_content(file_message.id)
+    # with open(file_message.file_name, 'wb') as fd:
+    #     for chunk in file_content.iter_content():
+    #         fd.write(chunk)
+    reply_message = TextSendMessage(text="Received file: " + file_message.file_name)
+    line_bot_api.reply_message(event.reply_token, reply_message)
 
 #主程式
 import os
