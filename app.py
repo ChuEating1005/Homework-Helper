@@ -20,6 +20,10 @@ from linebot.exceptions import (
 )
 from linebot.models import *
 
+import tempfile
+
+from pdf_processor import process_pdf_file
+
 app = Flask(__name__)
 
 # 必須放上自己的Channel Access Token
@@ -55,10 +59,21 @@ def handle_message(event):
     # line_bot_api.reply_message(event.reply_token,message)
     file_message = event.message
     file_content = line_bot_api.get_message_content(file_message.id)
-    # with open(file_message.file_name, 'wb') as fd:
-    #     for chunk in file_content.iter_content():
-    #         fd.write(chunk)
-    reply_message = TextSendMessage(text="Received file: " + file_message.file_name)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        for chunk in file_content.iter_content():
+            temp_file.write(chunk)
+        temp_file_path = temp_file.name
+        
+    # Process the PDF file
+    try:
+        response = process_pdf_file(temp_file_path)
+        reply_message = TextSendMessage(text=response)
+    except Exception as e:
+        reply_message = TextSendMessage(text=f"Failed to process the PDF file: {str(e)}")
+    finally:
+        os.remove(temp_file_path)  # Clean up the temporary file
+        
+   # reply_message = TextSendMessage(text="Received file: " + file_message.file_name)
     line_bot_api.reply_message(event.reply_token, reply_message)
 
 #主程式
