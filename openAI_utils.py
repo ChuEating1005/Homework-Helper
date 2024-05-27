@@ -21,7 +21,7 @@ def process_pdf_file(file_path):
     pdf_text= loader.load_and_split()
     combined_input = pdf_text[0].page_content 
     memory.chat_memory.add_user_message(combined_input)
-    response = llm.invoke(str(memory.chat_memory.messages) + "\n這篇文章的大綱是什麼,用繁體中文回答").content 
+    response = llm.invoke(str(memory.chat_memory.messages) + "\n這篇文章的大綱是什麼,用繁體中文回答").content  +"\nhistory:"+ str(memory.chat_memory.messages)
     memory.chat_memory.add_ai_message(response)
     return response
 
