@@ -1,6 +1,7 @@
 # LineBot Project
 
 這個branch應該是main，用來驅動LineBot的代碼（已經連接到Heroku）。
+app.py是主程式、openAI_utils.py是連openai的
 
 ## 環境變數設置
 所有的Key和Token都已經設置在Heroku的環境變數中。

@@ -1,7 +1,5 @@
 api_key.txt
-*.env
 *.sh
-__pycache__
 .env
-main.py
+chueat.py
 origin.py
