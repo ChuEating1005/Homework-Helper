@@ -31,7 +31,7 @@ class LineBotHandler:
         self.MODEL = "text-embedding-3-small"
         self.chat_history = []
         
-    def preprocess_text(text):
+    def preprocess_text(self,text):
         # Replace consecutive spaces, newlines and tabs
         text = re.sub(r'\s+', ' ', text)
         return text
@@ -52,7 +52,7 @@ class LineBotHandler:
         matched_texts = "\n".join([match['metadata']['text'] for match in matches])
         return matched_texts
 
-    def create_chain(vectorStore):
+    def create_chain(self,vectorStore):
         model = ChatOpenAI(
             model="gpt-3.5-turbo-1106",
             temperature=0.4
@@ -111,7 +111,7 @@ class LineBotHandler:
         ]
         index.upsert(vectors=records)
 
-    def process_chat(chain, question, chat_history):
+    def process_chat(self,chain, question, chat_history):
         response = chain.invoke({
             "chat_history": chat_history,
             "input": question,

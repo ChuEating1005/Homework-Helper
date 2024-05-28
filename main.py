@@ -1,7 +1,7 @@
 import os
 import re
 import openai
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from langchain_community.chat_models import ChatOpenAI
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone
@@ -19,7 +19,7 @@ from langchain.schema import Document
 import requests
 
 # Load environment variables
-#load_dotenv()
+load_dotenv()
 
 # Get environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -49,7 +49,7 @@ def find_match(input_text, num, index):
     matched_texts = "\n".join([match['metadata']['text'] for match in matches])
     return matched_texts
 
-def create_chain(vectorStore):
+def create_chain(self,vectorStore):
     model = ChatOpenAI(
         model="gpt-3.5-turbo-1106",
         temperature=0.4
@@ -127,25 +127,26 @@ def main():
     chain = create_chain(vectorStore)
     chat_history = []
 
-    while True:
-        user_input = input("You: ")
+    # while True:
+    #     user_input = input("You: ")
 
-        if user_input.lower() == 'exit':
-            break
+    #     if user_input.lower() == 'exit':
+    #         break
 
-        if user_input.lower() == 'upload':
-            print("Which PDF file do you want to upload?")
-            for i, pdf_path in enumerate(os.listdir("data")):
-                print(f"{i+1}. {pdf_path}")
-            choice = input("Enter the number of the PDF file: ")
-            pdf_path = os.path.join("data/", os.listdir("data")[int(choice) - 1])
-            print(pdf_path)
-            upload_pdf(embeddings, pdf_path)
-        else:
-            response = process_chat(chain, user_input, chat_history)
-            chat_history.append(HumanMessage(content=user_input))
-            chat_history.append(AIMessage(content=response))
-            print("Assistant:", response)
+    #     if user_input.lower() == 'upload':
+    #         print("Which PDF file do you want to upload?")
+    #         for i, pdf_path in enumerate(os.listdir("data")):
+    #             print(f"{i+1}. {pdf_path}")
+    #         choice = input("Enter the number of the PDF file: ")
+    #         pdf_path = os.path.join("data/", os.listdir("data")[int(choice) - 1])
+    #         print(pdf_path)
+    #         upload_pdf(embeddings, pdf_path)
+    #     else:
+    #         response = process_chat(chain, user_input, chat_history)
+    #         chat_history.append(HumanMessage(content=user_input))
+    #         chat_history.append(AIMessage(content=response))
+    #         print("Assistant:", response)
+    print(type(vectorStore))
 
 if __name__ == "__main__":
     main()
