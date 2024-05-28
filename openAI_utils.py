@@ -2,7 +2,6 @@
 from langchain_openai import ChatOpenAI
 #from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.memory import ConversationBufferMemory
 #load_dotenv()
 import os
 
