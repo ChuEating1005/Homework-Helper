@@ -9,18 +9,18 @@ from linebot.models import *
 import tempfile
 
 from openAI_utils import LineBotHandler
-
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME
 #執行檔案
 app = Flask(__name__)
 
 #初始化handler
-linebotHandler = LineBotHandler()
+linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME,OPENAI_API_KEY,MODEL_NAME)
 
 # 必須放上自己的Channel Access Token
-LINEBOT_API_KEY = os.getenv('LINE_BOT_API_KEY')
+
 line_bot_api = LineBotApi(LINEBOT_API_KEY )
 # 必須放上自己的Channel Secret
-LINEBOT_HANDLER = os.getenv('LINE_BOT_HANDLER')
+
 handler = WebhookHandler(LINEBOT_HANDLER)
 
 # 監聽所有來自 /callback 的 Post Request (固定)

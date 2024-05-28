@@ -22,13 +22,13 @@ import requests
 #load_dotenv()
 
 class LineBotHandler:
-    def __init__(self):
+    def __init__(self, pinecone_api_key, pinecone_environment, pinecone_index_name, openai_api_key, model_name):
         # Get environment variables
-        self.PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-        self.PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
-        self.PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
-        self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-        self.MODEL = "text-embedding-3-small"
+        self.PINECONE_API_KEY = pinecone_api_key
+        self.PINECONE_ENVIRONMENT = pinecone_environment,
+        self.PINECONE_INDEX_NAME = pinecone_index_name
+        self.OPENAI_API_KEY = openai_api_key
+        self.MODEL = model_name
         self.chat_history = []
         
     def preprocess_text(self,text):
