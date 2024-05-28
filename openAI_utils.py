@@ -2,8 +2,8 @@ import os
 import re
 import openai
 #from dotenv import load_dotenv
-from langchain_community.chat_models import ChatOpenAI
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.output_parsers import StrOutputParser
@@ -113,6 +113,7 @@ class LineBotHandler:
         index.upsert(vectors=records)
 
     def process_chat(self,chain, question, chat_history):
+        print(self.chat_history)
         response = chain.invoke({
             "chat_history": chat_history,
             "input": question,
