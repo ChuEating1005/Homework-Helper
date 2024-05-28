@@ -8,17 +8,20 @@ from linebot.models import *
 
 import tempfile
 
-from openAI_utils import process_pdf_file, handle_conversation
+from openAI_utils import LineBotHandler
 
 #執行檔案
 app = Flask(__name__)
 
+#初始化handler
+handler = LineBotHandler()
+
 # 必須放上自己的Channel Access Token
-linebot_api_key = os.getenv('LINE_BOT_API_KEY')
-line_bot_api = LineBotApi(linebot_api_key)
+LINEBOT_API_KEY = os.getenv('LINE_BOT_API_KEY')
+line_bot_api = LineBotApi(LINEBOT_API_KEY )
 # 必須放上自己的Channel Secret
-linebot_handler = os.getenv('LINE_BOT_HANDLER')
-handler = WebhookHandler(linebot_handler)
+LINEBOT_HANDLER = os.getenv('LINE_BOT_HANDLER')
+handler = WebhookHandler(LINEBOT_HANDLER)
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
@@ -55,7 +58,8 @@ def handle_message(event):
         
     try:
         #丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
-        response = process_pdf_file(temp_file_path)
+        handler.upload_pdf(temp_file_path)
+        response = f"PDF file uploaded successfully:{temp_file_path}"
     except Exception as e:
         response = f"Failed to process the PDF file: {str(e)}"
     finally:
@@ -72,7 +76,7 @@ def handle_text_message(event):
     input_text = event.message.text 
     try:
         # 處理對話 回傳openAI的回應
-        response = handle_conversation(input_text)
+        response = handler.handle_conversation(input_text)
     except Exception as e:
         response= f"Failed to text: {str(e)}"
     #傳結果訊息給使用者

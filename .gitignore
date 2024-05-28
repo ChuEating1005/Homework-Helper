@@ -3,3 +3,5 @@ api_key.txt
 *.sh
 __pycache__
 .env
+main.py
+origin.py
