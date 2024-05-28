@@ -23,6 +23,7 @@ import requests
 
 class LineBotHandler:
     def __init__(self, pinecone_api_key, pinecone_environment, pinecone_index_name, openai_api_key, model_name):
+        print("init")
         # Get environment variables
         self.PINECONE_API_KEY = pinecone_api_key
         self.PINECONE_ENVIRONMENT = pinecone_environment,
