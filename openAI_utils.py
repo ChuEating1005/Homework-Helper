@@ -130,4 +130,4 @@ class LineBotHandler:
         response = self.process_chat(chain, user_input, self.chat_history)
         self.chat_history.append(HumanMessage(content=user_input))
         self.chat_history.append(AIMessage(content=response))
-        print("Assistant:", response)
+        return response
