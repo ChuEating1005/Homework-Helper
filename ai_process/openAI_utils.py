@@ -154,5 +154,5 @@ class OpenAIHandler:
         self.chat_history.append(AIMessage(content=response))
         history += "user:"+user_input+","
         history += "AI:"+response+","
-        redis_handler.hmset(f'user:{user_id}','chat_history',history)
+        redis_handler.get_rds.hset(f'user:{user_id}','chat_history',history)
         return response
