@@ -6,8 +6,6 @@ class RedisHandler():
                                port = port ,
                                password=password,
                             decode_responses=True)
-    def get_rds(self):
-        return self.rds
     def set_db(self,user_id,user_name,pinecone_index_name):
         self.rds.hmset(f'user:{user_id}',{
             'user_name':user_name,

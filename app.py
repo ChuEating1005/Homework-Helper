@@ -102,17 +102,17 @@ def handle_text_message(event):
         case "更新notion":
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="輸入你的Notion API key", text="輸入你的Notion API key, please follow the format: NotionAPI: your key")),
-                QuickReplyButton(action=MessageAction(label="輸入Notion database key", text="輸入Notion database key")),
-                QuickReplyButton(action=MessageAction(label="將剛才的訊息加入Notion", text="將剛才的訊息加入Notion"))
+                QuickReplyButton(action=MessageAction(label="輸入Notion API key", text="輸入Notion API key")),
+                QuickReplyButton(action=MessageAction(label="輸入database key", text="輸入database key")),
+                QuickReplyButton(action=MessageAction(label="建立Notion", text="建立Notion"))
             ])) 
+        case "輸入Notion API key":
+            response = TextSendMessage(text="輸入你的Notion API key, please follow the format: NotionAPI: your key")
         case "輸入你的Notion API key":
-            key = event.message.text
-            redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", key)
-        case "輸入Notion database key":
-            key= event.message.text
-            redis_handler.rds.hset(f"user:{user_id}", "notion_db_id", key)
-        case "將剛才的訊息加入Notion":
+            redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", input_text)
+        case "輸入database key":
+            redis_handler.rds.hset(f"user:{user_id}", "notion_db_id", input_text)
+        case "建立Notion":
             notion_handler = Notion_handler(user_id)
             notion_handler.notion_test()
             response = TextSendMessage(text="建立完成")
