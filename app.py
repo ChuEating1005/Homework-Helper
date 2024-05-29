@@ -7,14 +7,16 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 
 import tempfile
-
+import redis
 from openAI_utils import LineBotHandler
-from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME
+from redis_db import RedisUser
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD
 #執行檔案
 app = Flask(__name__)
 
 #初始化handler
 linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME,OPENAI_API_KEY,MODEL_NAME)
+redis_user = RedisUser(host=REDIS_HOST,password=REDIS_PASSWORD)
 
 # 必須放上自己的Channel Access Token
 
@@ -76,6 +78,11 @@ def handle_text_message(event):
     input_text = event.message.text 
     
     match input_text:
+        case "setDB":
+            redis_user.set_user_name(user_id,"Zichen")
+            response = TextSendMessage(text="setDB")
+        case "getName":
+            response = TextSendMessage(text=redis_user.get_user_name(user_id))
         case "上傳PDF":
             response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
         case "問問題":
