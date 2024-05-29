@@ -20,7 +20,7 @@ import requests
 from redis_get.redis_db import RedisHandler
 from config import REDIS_HOST,REDIS_PORT,REDIS_PASSWORD
 # Load environment variables
-#load_dotenv()
+# load_dotenv()
 
 class OpenAIHandler:
     def __init__(self, pinecone_api_key, pinecone_environment, pinecone_index_name, openai_api_key, model_name):

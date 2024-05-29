@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Intro-to-AI Final Project
-=======
 # LineBot Project
 
 這個branch應該是main，用來驅動LineBot的代碼（已經連接到Heroku）。
@@ -44,4 +41,3 @@ heroku logs --tail
 3. 成功上傳後，LineBot會回應“上傳成功”。
 4. 之後可以直接詢問已上傳檔案的問題。
 
->>>>>>> 4cd0f16fa95f9636cf86546c79c8d0ffd3b4cc07

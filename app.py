@@ -9,13 +9,13 @@ from linebot.models import *
 import tempfile
 from ai_process.openAI_utils import OpenAIHandler
 from redis_get.redis_db import RedisHandler
-from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, NOTION_TOKEN, NOTION_DATABASE_ID
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 from NotionAPI import Notion
+from redis_get.redis_db import RedisHandler
 # 執行檔案
 app = Flask(__name__)
 
 #初始化handler
-
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 
 # 必須放上自己的Channel Access Token
@@ -24,8 +24,6 @@ line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
 
 handler = WebhookHandler(LINEBOT_HANDLER)
-
-notion_api = Notion(NOTION_TOKEN, NOTION_DATABASE_ID)
 
 
 # 監聽所有來自 /callback 的 Post Request (固定)
@@ -62,7 +60,7 @@ def handle_message(event):
         temp_file_path = temp_file.name
         
     try:
-        #丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
+        # 丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
         pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
         openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
         openaiHandler.upload_pdf(temp_file_path)
@@ -74,7 +72,7 @@ def handle_message(event):
     # 傳結果訊息給使用者
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=response))
 
-# 處理text message
+# 處理 text message
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     # 取得使用者id
@@ -105,9 +103,21 @@ def handle_text_message(event):
         case "更新notion":
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="notion連結", text="notion連結")),
-                QuickReplyButton(action=MessageAction(label="新增notion", text="新增notion"))
+                QuickReplyButton(action=MessageAction(label="輸入你的Notion API key", text="輸入你的Notion API key, please follow the format: NotionAPI: your key")),
+                QuickReplyButton(action=MessageAction(label="輸入Notion database key", text="輸入Notion database key")),
+                QuickReplyButton(action=MessageAction(label="將剛才的訊息加入Notion", text="將剛才的訊息加入Notion"))
             ])) 
+        case "輸入你的Notion API key":
+            key = event.message.text
+            redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", key)
+        case "輸入Notion database key":
+            key= event.message.text
+            redis_handler.rds.hset(f"user:{user_id}", "notion_db_id", key)
+        case "將剛才的訊息加入Notion":
+            notion_api = redis_handler.get_user_notion_api(user_id)
+            notion_database = redis_handler.get_user_notion_database(user_id)
+            notion_api = Notion(notion_api, notion_database)
+            
         case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷" |"notion連結" | "新增notion":
             response = TextSendMessage(text="尚未完成服務")
         case _:
