@@ -1,5 +1,4 @@
 import redis
-
 class RedisHandler():
     def __init__(self,host,port,password) :
         self.rds = redis.Redis(host=host,
