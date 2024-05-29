@@ -112,7 +112,7 @@ class Notion_handler:
                     ]
                 }
         res = requests.post(create_url, headers=self.headers, json=payload)
-        print(res.status_code)
+        print(f"code:{res.status_code}")
         return res
 
     # if erase_origin: delete the original block and create a new one
