@@ -149,9 +149,9 @@ class OpenAIHandler:
         chain = self.create_chain(vectorStore)
         redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
         history = redis_handler.get_chat_history(user_id)
-        response = self.process_chat(chain, user_input, self.chat_history)
-        self.chat_history.append(HumanMessage(content=user_input))
-        self.chat_history.append(AIMessage(content=response))
+        response = self.process_chat(chain, user_input, HumanMessage(content=history))
+        # self.chat_history.append(HumanMessage(content=user_input))
+        # self.chat_history.append(AIMessage(content=response))
         history += "user:"+user_input+","
         history += "AI:"+response+","
         redis_handler.set_history(user_id,history)
