@@ -149,8 +149,7 @@ class OpenAIHandler:
         redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
         chat_history = redis_handler.get_chat_history(user_id)
         response = self.process_chat(chain, user_input, chat_history)
-        chat_history.append(HumanMessage(content=user_input))
-        chat_history.append(AIMessage(content=response))
-        
+        chat_history.append("user:"+user_input+",")
+        chat_history.append("AI:"+response+",")
         redis_handler.hset(f'user:{user_id}','chat_history',chat_history)
         return response
