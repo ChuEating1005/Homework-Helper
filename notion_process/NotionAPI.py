@@ -171,7 +171,7 @@ class Notion_handler:
             "complete": {"checkbox": complete}
         }
         text = "erase!"
-        notion.create_page(data, text)
+        self.create_page(data, text)
         page_id = self.get_page_id_by_name("HW2")
         print(f"page_id = {page_id}")
         self.update_page(page_id, data, text, erase_origin=True)
