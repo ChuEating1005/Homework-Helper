@@ -25,3 +25,6 @@ class RedisHandler():
     
     def get_chat_history(self,user_id):
         return self.rds.hget(f'user:{user_id}','chat_history')
+    
+    def set_history(self,user_id,history):
+        self.rds.hset(f'user:{user_id}','chat_history',history)
