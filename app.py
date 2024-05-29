@@ -5,6 +5,7 @@ import os
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
+import json
 import tempfile
 from ai_process.openAI_utils import OpenAIHandler
 from redis_get.redis_db import RedisHandler
@@ -80,7 +81,7 @@ def handle_text_message(event):
     match input_text:
         case "getLast":
             history = redis_handler.get_last_history(user_id)
-            data = str(history)
+            data = json.loads(history)
             response = TextSendMessage(text=data)
         case _ if input_text.startswith("setDB:"):
             name = input_text[len("setDB:"):]
