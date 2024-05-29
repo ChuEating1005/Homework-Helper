@@ -110,7 +110,6 @@ def handle_text_message(event):
             try:
                 # 處理對話 回傳openAI的回應
                 pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
-                chat_history = redis_handler.get_chat_history(user_id)
                 openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
                 response = TextSendMessage(text=openaiHandler.handle_conversation(user_id,input_text))
             except Exception as e:
