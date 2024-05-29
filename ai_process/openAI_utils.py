@@ -12,16 +12,17 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough, Runn
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pinecone import Pinecone as PineconeClient
+from pinecone import Pinecone as PineconeClient, ServerlessSpec
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain.schema import Document
 import requests
-
+from redis_get.redis_db import RedisHandler
+from config import REDIS_HOST,REDIS_PORT,REDIS_PASSWORD
 # Load environment variables
 #load_dotenv()
 
-class LineBotHandler:
+class OpenAIHandler:
     def __init__(self, pinecone_api_key, pinecone_environment, pinecone_index_name, openai_api_key, model_name):
         print("init")
         # Get environment variables
@@ -30,13 +31,29 @@ class LineBotHandler:
         self.PINECONE_INDEX_NAME = pinecone_index_name
         self.OPENAI_API_KEY = openai_api_key
         self.MODEL = model_name
-        self.chat_history = []
         
     def preprocess_text(self,text):
         # Replace consecutive spaces, newlines and tabs
         text = re.sub(r'\s+', ' ', text)
         return text
 
+    def create_index(self):
+        pinecone = PineconeClient(api_key=self.PINECONE_API_KEY)
+        index_name = self.PINECONE_INDEX_NAME
+        print(index_name)
+        #print(index_name)
+        if index_name not in pinecone.list_indexes().names():
+            pinecone.create_index(
+                name=index_name,
+                dimension=1536,
+                metric="cosine",
+                spec=ServerlessSpec(
+                    cloud='aws', 
+                    region='us-east-1'
+                ) 
+            )
+        index = pinecone.Index(index_name)
+        return index
     # Define a function to create embeddings
     def create_embeddings(self,texts):
         openai.api_key = self.OPENAI_API_KEY
@@ -46,12 +63,12 @@ class LineBotHandler:
             embeddings_list.append(res['data'][0]['embedding'])
         return embeddings_list
 
-    def find_match(self,input_text, num, index):
-        input_em = self.create_embeddings([Document(page_content=input_text, metadata={})])
-        result = index.query(vector=input_em[0], top_k=num, include_metadata=True)
-        matches = result['matches']
-        matched_texts = "\n".join([match['metadata']['text'] for match in matches])
-        return matched_texts
+    # def find_match(self,input_text, num, index):
+    #     input_em = self.create_embeddings([Document(page_content=input_text, metadata={})])
+    #     result = index.query(vector=input_em[0], top_k=num, include_metadata=True)
+    #     matches = result['matches']
+    #     matched_texts = "\n".join([match['metadata']['text'] for match in matches])
+    #     return matched_texts
 
     def create_chain(self,vectorStore):
         model = ChatOpenAI(
@@ -71,7 +88,7 @@ class LineBotHandler:
             prompt=prompt
         )
 
-        retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
+        retriever = vectorStore.as_retriever(search_kwargs={"k": 5})
 
         retriever_prompt = ChatPromptTemplate.from_messages([
             MessagesPlaceholder(variable_name="chat_history"),
@@ -95,8 +112,8 @@ class LineBotHandler:
 
     def upload_pdf(self,pdf_path, chunk_size=1000, chunk_overlap=100):
         embeddings = OpenAIEmbeddings(model=self.MODEL, openai_api_key=self.OPENAI_API_KEY)
-        pinecone = PineconeClient(api_key=self.PINECONE_API_KEY, environment=self.PINECONE_ENVIRONMENT)
-        index = pinecone.Index(self.PINECONE_INDEX_NAME)
+        
+        index = self.create_index()
         # Loading
         loader = PyPDFLoader(pdf_path)
         data = loader.load()
@@ -113,23 +130,26 @@ class LineBotHandler:
         index.upsert(vectors=records)
 
     def process_chat(self,chain, question, chat_history):
-        print(self.chat_history)
         response = chain.invoke({
             "chat_history": chat_history,
             "input": question,
         })
         return response["answer"]
-    def handle_conversation(self,user_input):
+    def handle_conversation(self,user_id,user_input):
         # query = "Assignment 3 有什麼問題？"
         # context = find_match(query)
         # # print("Context:", context)
         # context_docs = [Document(page_content=text, metadata={}) for text in context.split("\n")]
         # answer = chain.invoke({"context": context_docs, "question": query})
         # print(answer)
+        index = self.create_index()
         embeddings = OpenAIEmbeddings(model=self.MODEL, openai_api_key=self.OPENAI_API_KEY)
         vectorStore = Pinecone.from_existing_index(index_name=self.PINECONE_INDEX_NAME, embedding=embeddings)
         chain = self.create_chain(vectorStore)
-        response = self.process_chat(chain, user_input, self.chat_history)
-        self.chat_history.append(HumanMessage(content=user_input))
-        self.chat_history.append(AIMessage(content=response))
+        redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
+        chat_history = redis_handler.get_chat_history(user_id)
+        response = self.process_chat(chain, user_input, [])
+        chat_history += "user:"+user_input+","
+        chat_history += "AI:"+response+","
+        redis_handler.hset(f'user:{user_id}','chat_history',chat_history)
         return response
