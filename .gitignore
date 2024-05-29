@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.env
 *.txt
 <<<<<<< HEAD
@@ -7,3 +8,10 @@ db.json
 =======
 venv/
 >>>>>>> David
+=======
+api_key.txt
+*.sh
+.env
+chueat.py
+origin.py
+>>>>>>> 4cd0f16fa95f9636cf86546c79c8d0ffd3b4cc07
