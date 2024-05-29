@@ -49,6 +49,7 @@ class Notion_handler:
                 response = requests.post(url, json=payload, headers=self.headers)
                 data = response.json()
                 results.extend(data["results"])
+            print("success")
             return results
         else:
             print("error, status_code != 200")
@@ -59,10 +60,19 @@ class Notion_handler:
         for page in pages:
             page_id = page["id"]
             props = page["properties"]
-            Homework = props["Homework"]["title"][0]["text"]["content"]
-            deadline = props["deadline"]["date"]["start"]
-            deadline = datetime.fromisoformat(deadline)
-            complete = props["complete"]["checkbox"]
+            if "Homework" in props and "title" in props["Homework"] and len(props["Homework"]["title"]) > 0:
+                Homework = props["Homework"]["title"][0]["text"]["content"]
+            else:
+                Homework = None  # Or handle the missing key case appropriately
+            if "deadline" in props and "date" in props["deadline"]:
+                deadline = props["deadline"]["date"]["start"]
+                deadline = datetime.fromisoformat(deadline)
+            else:
+                deadline = None  # Or handle the missing key case appropriately
+            if "complete" in props:
+                complete = props["complete"]["checkbox"]
+            else:
+                complete = None  # Or handle the missing key case appropriately
             print(Homework, deadline, complete)
             
     def get_page_id_by_name(self, page_name):
