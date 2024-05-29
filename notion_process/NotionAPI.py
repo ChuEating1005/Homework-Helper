@@ -123,7 +123,7 @@ class Notion_handler:
         res = requests.get(url, headers=self.headers)
         children = res.json().get("results", [])
         for child in children:
-            child_url = f"https://api.notion.com/v1/blocks/{child["id"]}"
+            child_url = f"https://api.notion.com/v1/blocks/{child['id']}"
             res = requests.delete(child_url, headers=self.headers)
             print("delete child status:", res.status_code)
                 
