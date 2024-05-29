@@ -81,9 +81,10 @@ class OpenAIHandler:
             model="gpt-3.5-turbo-1106",
             temperature=0.4
         )
-
+        redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
+        name = redis_handler.get_user_name(user_id)
         history = RedisChatMessageHistory(
-            session_id=user_id, 
+            session_id=name, 
             url=REDIS_URL
         )
         
