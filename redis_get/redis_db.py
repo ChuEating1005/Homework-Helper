@@ -1,4 +1,5 @@
 import redis
+import json
 class RedisHandler():
     def __init__(self,host,port,password) :
         self.rds = redis.Redis(host=host,
@@ -27,6 +28,8 @@ class RedisHandler():
     
     def get_last_history(self,user_id):
         name = self.get_user_name(user_id)
-        history = self.rds.lindex(name,0)
+        history = self.rds.lindex(f'message_store:{name}',0)
+        data = json.loads(history)
+        print(data)
         return history
         
