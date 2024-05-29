@@ -9,3 +9,4 @@ LINEBOT_HANDLER = os.getenv('LINE_BOT_HANDLER')
 MODEL_NAME = "text-embedding-3-small"
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+REDIS_PORT = os.getenv('REDIS_PORT')

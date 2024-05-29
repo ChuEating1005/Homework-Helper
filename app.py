@@ -10,13 +10,13 @@ import tempfile
 import redis
 from openAI_utils import LineBotHandler
 from redis_db import RedisUser
-from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 #執行檔案
 app = Flask(__name__)
 
 #初始化handler
 linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME,OPENAI_API_KEY,MODEL_NAME)
-redis_user = RedisUser(host=REDIS_HOST,password=REDIS_PASSWORD)
+redis_user = RedisUser(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 
 # 必須放上自己的Channel Access Token
 

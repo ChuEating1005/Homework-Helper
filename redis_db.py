@@ -1,8 +1,8 @@
 import redis
 
 class RedisUser():
-    def __init__(self,host,password) :
-        self.rds = redis.Redis(host=host,port = 1984 ,password=password)
+    def __init__(self,host,port,password) :
+        self.rds = redis.Redis(host=host,port = port ,password=password)
     
     def set_user_name(self,user_id,user_name):
         self.rds.hmset(f'user:{user_id}',{
