@@ -25,11 +25,14 @@ class RedisHandler():
     
     def get_chat_history(self,user_id):
         return self.rds.hget(f'user:{user_id}','chat_history')
-    
-    def get_last_history(self,user_id):
-        name = self.get_user_name(user_id)
-        history = self.rds.lindex(f'message_store:{name}',0)
-        data = json.loads(history)
-        print(data)
-        return history
+    #TODO: 抓取最後一筆對話的文字 拜託
+    # def get_last_history(self,user_id):
+    #     name = self.get_user_name(user_id)
+    #     try:
+    #         history = self.rds.lindex(f'message_store:{name}',0)
+    #     except Exception as e:
+    #         print(e)
+    #     data = json.loads(history)
+    #     print(data)
+    #     return history
         
