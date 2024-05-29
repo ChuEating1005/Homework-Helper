@@ -29,6 +29,7 @@ handler = WebhookHandler(LINEBOT_HANDLER)
 
 notion_api = Notion(NOTION_TOKEN, NOTION_DATABASE_ID)
 
+
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -48,13 +49,13 @@ def callback():
     return 'OK'
 
 
-#訊息傳遞區塊
+# 訊息傳遞區塊
 # 處理file message
 @handler.add(MessageEvent, message=FileMessage)
 def handle_message(event):
     # 取得使用者id
     user_id = event.source.user_id
-    #把讀進來的檔案存成暫存檔
+    # 把讀進來的檔案存成暫存檔
     file_message = event.message
     file_content = line_bot_api.get_message_content(file_message.id)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
@@ -63,14 +64,14 @@ def handle_message(event):
         temp_file_path = temp_file.name
         
     try:
-        #丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
+        # 丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
         linebotHandler.upload_pdf(temp_file_path)
         response = f"PDF file uploaded successfully:{temp_file_path}"
     except Exception as e:
         response = f"Failed to process the PDF file: {str(e)}"
     finally:
         os.remove(temp_file_path)  # 清掉暫存檔
-    #傳結果訊息給使用者
+    # 傳結果訊息給使用者
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=response))
 
 # 處理text message
