@@ -6,16 +6,20 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.chat_message_histories import (
+    UpstashRedisChatMessageHistory,
+)
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+from langchain.chains import create_retrieval_chain, LLMChain
+from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pinecone import Pinecone as PineconeClient, ServerlessSpec
-from langchain.chains.history_aware_retriever import create_history_aware_retriever
-from langchain_core.messages import HumanMessage, AIMessage
 from langchain.schema import Document
+from langchain.memory import ConversationBufferMemory
 import requests
 
 # Load environment variables
@@ -23,16 +27,12 @@ load_dotenv()
 
 # Get environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
-# PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+UPSTASH_URL = os.getenv("UPSTASH_URL")
+UPSTASH_TOKEN = os.getenv("UPSTASH_TOKEN")
 MODEL = "text-embedding-3-small"
 openai.api_key = OPENAI_API_KEY
 
-def preprocess_text(text):
-    # Replace consecutive spaces, newlines and tabs
-    text = re.sub(r'\s+', ' ', text)
-    return text
 
 def create_index(user_id):
     pinecone = PineconeClient(api_key=PINECONE_API_KEY)
@@ -72,6 +72,17 @@ def create_chain(vectorStore):
         temperature=0.4
     )
 
+    history = UpstashRedisChatMessageHistory(
+        url=UPSTASH_URL, token=UPSTASH_TOKEN, ttl=500, session_id="chat1"
+    )
+
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        input_key="input",
+        return_messages=True,
+        chat_memory=history,
+    )
+    
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Answer the user's questions based on the context: {context}"),
         MessagesPlaceholder(variable_name="chat_history"),
@@ -79,9 +90,11 @@ def create_chain(vectorStore):
     ])
 
     # Define the RAG chain
-    chain = create_stuff_documents_chain(
+    chain = LLMChain(
         llm=model,
-        prompt=prompt
+        prompt=prompt,
+        verbose=True,
+        memory=memory
     )
 
     retriever = vectorStore.as_retriever(search_kwargs={"k": 5})
@@ -127,12 +140,12 @@ def upload_pdf(index, embeddings, pdf_path, chunk_size=1000, chunk_overlap=100):
     ]
     index.upsert(vectors=records)
 
-def process_chat(chain, question, chat_history):
+def process_chat(chain, question):
     response = chain.invoke({
-        "chat_history": chat_history,
-        "input": question,
+        "input": question
     })
-    return response["answer"]
+    #print(response)
+    return response["answer"]["text"]
 
 # Example to process and upload PDF, and then query
 def main():
@@ -148,7 +161,7 @@ def main():
     vectorStore = Pinecone.from_existing_index(index_name=user_id + "db", embedding=embeddings)
 
     chain = create_chain(vectorStore)
-    chat_history = []
+    # chat_history = []
 
     while True:
         user_input = input("You: ")
@@ -165,9 +178,9 @@ def main():
             print(pdf_path)
             upload_pdf(index, embeddings, pdf_path)
         else:
-            response = process_chat(chain, user_input, chat_history)
-            chat_history.append(HumanMessage(content=user_input))
-            chat_history.append(AIMessage(content=response))
+            response = process_chat(chain, user_input)
+            #chat_history.append(HumanMessage(content=user_input))
+            #chat_history.append(AIMessage(content=response))
             print("Assistant:", response)
 
 if __name__ == "__main__":
