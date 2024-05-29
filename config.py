@@ -7,3 +7,5 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LINEBOT_API_KEY = os.getenv('LINE_BOT_API_KEY')
 LINEBOT_HANDLER = os.getenv('LINE_BOT_HANDLER')
 MODEL_NAME = "text-embedding-3-small"
+NOTION_TOKEN = os.getenv('NOTION_TOKEN')
+NOTION_DATABASE_ID = os.getenv('DATABASE_ID')

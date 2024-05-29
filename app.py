@@ -9,7 +9,11 @@ from linebot.models import *
 import tempfile
 
 from openAI_utils import LineBotHandler
-from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME, NOTION_TOKEN, NOTION_DATABASE_ID
+
+# import NOTION API
+from NotionAPI import Notion
+
 #執行檔案
 app = Flask(__name__)
 
@@ -18,10 +22,12 @@ linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE
 
 # 必須放上自己的Channel Access Token
 
-line_bot_api = LineBotApi(LINEBOT_API_KEY )
+line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
 
 handler = WebhookHandler(LINEBOT_HANDLER)
+
+notion_api = Notion(NOTION_TOKEN, NOTION_DATABASE_ID)
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
@@ -93,7 +99,7 @@ def handle_text_message(event):
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="notion連結", text="notion連結")),
                 QuickReplyButton(action=MessageAction(label="新增notion", text="新增notion"))
-            ]))
+            ])) 
         case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷" |"notion連結" | "新增notion":
             response = TextSendMessage(text="尚未完成服務")
         case _:
@@ -104,7 +110,7 @@ def handle_text_message(event):
                 response= TextSendMessage(text=f"Failed to text: {str(e)}")
                 
     #傳結果訊息給使用者
-    line_bot_api.reply_message(event.reply_token,response)
+    line_bot_api.reply_message(event.reply_token, response)
 
 #主程式
 import os

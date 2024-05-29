@@ -6,14 +6,14 @@ from dotenv import load_dotenv
 from datetime import datetime, timezone
 
 class Notion:
-    def __init__(self):
+    def __init__(self, notion_token, databse_id):
         load_dotenv(override=True)
         # you can get your NOTION_TOKEN from notion API integrations
-        self.notion_token = os.getenv('NOTION_TOKEN')
+        self.notion_token = notion_token
 
         # you can get your database key by create a database in notion
         # click share and copy link
-        self.database_id = os.getenv('DATABASE_ID')
+        self.database_id = databse_id
 
         self.headers = {
             "Authorization": "Bearer " + self.notion_token,
