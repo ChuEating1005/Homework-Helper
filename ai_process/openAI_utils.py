@@ -31,6 +31,7 @@ class OpenAIHandler:
         self.PINECONE_INDEX_NAME = pinecone_index_name
         self.OPENAI_API_KEY = openai_api_key
         self.MODEL = model_name
+        self.chat_history = []
         
     def preprocess_text(self,text):
         # Replace consecutive spaces, newlines and tabs
@@ -147,9 +148,11 @@ class OpenAIHandler:
         vectorStore = Pinecone.from_existing_index(index_name=self.PINECONE_INDEX_NAME, embedding=embeddings)
         chain = self.create_chain(vectorStore)
         redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
-        chat_history = redis_handler.get_chat_history(user_id)
-        response = self.process_chat(chain, user_input, [])
-        chat_history += "user:"+user_input+","
-        chat_history += "AI:"+response+","
-        redis_handler.hset(f'user:{user_id}','chat_history',chat_history)
+        history = redis_handler.get_chat_history(user_id)
+        response = self.process_chat(chain, user_input, self.chat_history)
+        self.chat_history.append(HumanMessage(content=user_input))
+        self.process_chatchat_history.append(AIMessage(content=response))
+        history += "user:"+user_input+","
+        history += "AI:"+response+","
+        redis_handler.hset(f'user:{user_id}','chat_history',history)
         return response
