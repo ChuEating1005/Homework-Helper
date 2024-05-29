@@ -76,7 +76,7 @@ class OpenAIHandler:
     #     matched_texts = "\n".join([match['metadata']['text'] for match in matches])
     #     return matched_texts
 
-    def create_chain(vectorStore, user_id):
+    def create_chain(self,vectorStore, user_id):
         model = ChatOpenAI(
             model="gpt-3.5-turbo-1106",
             temperature=0.4
