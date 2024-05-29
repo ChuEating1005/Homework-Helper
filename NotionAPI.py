@@ -145,7 +145,7 @@ if __name__ == '__main__':
     notion.iterate_data(pages)
     
     # create page
-    Homework = 'HW2'
+    Homework = 'HW3'
     complete = False
     year = 2024
     month = 5
