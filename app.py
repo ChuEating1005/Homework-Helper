@@ -7,16 +7,15 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 
 import tempfile
-import redis
-from openAI_utils import LineBotHandler
-from redis_db import RedisUser
-from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
+from ai_process.openAI_utils import OpenAIHandler
+from redis_get.redis_db import RedisHandler
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 #執行檔案
 app = Flask(__name__)
 
 #初始化handler
-linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME,OPENAI_API_KEY,MODEL_NAME)
-redis_user = RedisUser(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
+
+redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 
 # 必須放上自己的Channel Access Token
 
@@ -60,8 +59,10 @@ def handle_message(event):
         
     try:
         #丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
-        linebotHandler.upload_pdf(temp_file_path)
-        response = f"PDF file uploaded successfully:{temp_file_path}"
+        pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+        openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+        openaiHandler.upload_pdf(temp_file_path)
+        response = f"PDF file uploaded successfully:"
     except Exception as e:
         response = f"Failed to process the PDF file: {str(e)}"
     finally:
@@ -78,11 +79,12 @@ def handle_text_message(event):
     input_text = event.message.text 
     
     match input_text:
-        case "setDB":
-            redis_user.set_user_name(user_id,"Zichen")
-            response = TextSendMessage(text="setDB")
+        case _ if input_text.startswith("setDB:"):
+            name = input_text[len("setDB:"):]
+            pinecone_index_name = name +"db"
+            redis_handler.set_db(user_id,name,pinecone_index_name)
         case "getName":
-            response = TextSendMessage(text=redis_user.get_user_name(user_id))
+            response = TextSendMessage(text=redis_handler.get_user_name(user_id))
         case "上傳PDF":
             response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
         case "問問題":
@@ -106,7 +108,10 @@ def handle_text_message(event):
         case _:
             try:
                 # 處理對話 回傳openAI的回應
-                response = TextSendMessage(text=linebotHandler.handle_conversation(input_text))
+                pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+                chat_history = redis_handler.get_chat_history(user_id)
+                openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+                response = TextSendMessage(text=openaiHandler.handle_conversation(user_id,input_text))
             except Exception as e:
                 response= TextSendMessage(text=f"Failed to text: {str(e)}")
                 
