@@ -74,13 +74,37 @@ def handle_text_message(event):
     user_id = event.source.user_id
     # 讀取使用者傳來的訊息
     input_text = event.message.text 
-    try:
-        # 處理對話 回傳openAI的回應
-        response = linebotHandler.handle_conversation(input_text)
-    except Exception as e:
-        response= f"Failed to text: {str(e)}"
+    
+    match input_text:
+        case "上傳PDF":
+            response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
+        case "問問題":
+            response = TextSendMessage(text="你有啥問題")
+        case "更新google日歷":
+            response = TextSendMessage("選擇服務項目",
+            quick_reply=QuickReply(items=[
+                QuickReplyButton(action=MessageAction(label="日歷連結", text="日歷連結")),
+                QuickReplyButton(action=MessageAction(label="新增日歷", text="新增日歷")),
+                QuickReplyButton(action=MessageAction(label="刪除日歷", text="刪除日歷")),
+                QuickReplyButton(action=MessageAction(label="查看日歷", text="查看日歷"))
+            ]))
+        case "更新notion":
+            response = TextSendMessage("選擇服務項目",
+            quick_reply=QuickReply(items=[
+                QuickReplyButton(action=MessageAction(label="notion連結", text="notion連結")),
+                QuickReplyButton(action=MessageAction(label="新增notion", text="新增notion"))
+            ]))
+        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷" |"notion連結" | "新增notion":
+            response = TextSendMessage(text="尚未完成服務")
+        case _:
+            try:
+                # 處理對話 回傳openAI的回應
+                response = TextSendMessage(text=linebotHandler.handle_conversation(input_text))
+            except Exception as e:
+                response= TextSendMessage(text=f"Failed to text: {str(e)}")
+                
     #傳結果訊息給使用者
-    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=response))
+    line_bot_api.reply_message(event.reply_token,response)
 
 #主程式
 import os
