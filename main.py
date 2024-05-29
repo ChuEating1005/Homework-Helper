@@ -12,7 +12,7 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough, Runn
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pinecone import Pinecone as PineconeClient
+from pinecone import Pinecone as PineconeClient, ServerlessSpec
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain.schema import Document
@@ -24,7 +24,7 @@ load_dotenv()
 # Get environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
-PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
+# PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = "text-embedding-3-small"
 openai.api_key = OPENAI_API_KEY
@@ -34,6 +34,23 @@ def preprocess_text(text):
     text = re.sub(r'\s+', ' ', text)
     return text
 
+def create_index(user_id):
+    pinecone = PineconeClient(api_key=PINECONE_API_KEY)
+    index_name = user_id + "db"
+    #print(index_name)
+    if index_name not in pinecone.list_indexes().names():
+        pinecone.create_index(
+            name=index_name,
+            dimension=1536,
+            metric="cosine",
+            spec=ServerlessSpec(
+                cloud='aws', 
+                region='us-east-1'
+            ) 
+        )
+    index = pinecone.Index(index_name)
+    return index
+
 # Define a function to create embeddings
 def create_embeddings(texts):
     embeddings_list = []
@@ -42,12 +59,12 @@ def create_embeddings(texts):
         embeddings_list.append(res['data'][0]['embedding'])
     return embeddings_list
 
-def find_match(input_text, num, index):
-    input_em = create_embeddings([Document(page_content=input_text, metadata={})])
-    result = index.query(vector=input_em[0], top_k=num, include_metadata=True)
-    matches = result['matches']
-    matched_texts = "\n".join([match['metadata']['text'] for match in matches])
-    return matched_texts
+# def find_match(input_text, num, index):
+#     input_em = create_embeddings([Document(page_content=input_text, metadata={})])
+#     result = index.query(vector=input_em[0], top_k=num, include_metadata=True)
+#     matches = result['matches']
+#     matched_texts = "\n".join([match['metadata']['text'] for match in matches])
+#     return matched_texts
 
 def create_chain(vectorStore):
     model = ChatOpenAI(
@@ -67,7 +84,7 @@ def create_chain(vectorStore):
         prompt=prompt
     )
 
-    retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
+    retriever = vectorStore.as_retriever(search_kwargs={"k": 5})
 
     retriever_prompt = ChatPromptTemplate.from_messages([
         MessagesPlaceholder(variable_name="chat_history"),
@@ -89,14 +106,17 @@ def create_chain(vectorStore):
 
     return retrieval_chain
 
-def upload_pdf(embeddings, pdf_path, chunk_size=1000, chunk_overlap=100):
-    pinecone = PineconeClient(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
-    index = pinecone.Index(PINECONE_INDEX_NAME)
+def upload_pdf(index, embeddings, pdf_path, chunk_size=1000, chunk_overlap=100):
+    #pinecone = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
+    #index = pinecone.Index(PINECONE_INDEX_NAME)
     # Loading
     loader = PyPDFLoader(pdf_path)
     data = loader.load()
     # Chunking
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
+    )
     documents = text_splitter.split_documents(data)
     # Embedding
     embeddings_list = [embeddings.embed_query(document.page_content) for document in documents]
@@ -122,8 +142,11 @@ def main():
     # context_docs = [Document(page_content=text, metadata={}) for text in context.split("\n")]
     # answer = chain.invoke({"context": context_docs, "question": query})
     # print(answer)
+    user_id = input("Enter your user ID: ")
+    index = create_index(user_id)
     embeddings = OpenAIEmbeddings(model=MODEL, openai_api_key=OPENAI_API_KEY)
-    vectorStore = Pinecone.from_existing_index(index_name=PINECONE_INDEX_NAME, embedding=embeddings)
+    vectorStore = Pinecone.from_existing_index(index_name=user_id + "db", embedding=embeddings)
+
     chain = create_chain(vectorStore)
     chat_history = []
 
@@ -140,7 +163,7 @@ def main():
             choice = input("Enter the number of the PDF file: ")
             pdf_path = os.path.join("data/", os.listdir("data")[int(choice) - 1])
             print(pdf_path)
-            upload_pdf(embeddings, pdf_path)
+            upload_pdf(index, embeddings, pdf_path)
         else:
             response = process_chat(chain, user_input, chat_history)
             chat_history.append(HumanMessage(content=user_input))
