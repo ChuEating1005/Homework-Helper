@@ -77,12 +77,13 @@ def handle_text_message(event):
     user_id = event.source.user_id
     # 讀取使用者傳來的訊息
     input_text = event.message.text 
-    
+    response = ""
     match input_text:
         case _ if input_text.startswith("setDB:"):
             name = input_text[len("setDB:"):]
             pinecone_index_name = name +"db"
             redis_handler.set_db(user_id,name,pinecone_index_name)
+            response = TextSendMessage(text=f"User {name} has been created")
         case "getName":
             response = TextSendMessage(text=redis_handler.get_user_name(user_id))
         case "上傳PDF":
