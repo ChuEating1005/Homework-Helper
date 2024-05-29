@@ -9,6 +9,7 @@ import json
 import tempfile
 from ai_process.openAI_utils import OpenAIHandler
 from redis_get.redis_db import RedisHandler
+from notion_process.NotionAPI import Notion_handler
 from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 #執行檔案
 app = Flask(__name__)
@@ -79,10 +80,6 @@ def handle_text_message(event):
     input_text = event.message.text 
     response = ""
     match input_text:
-        case "getLast":
-            history = redis_handler.get_last_history(user_id)
-            data = json.loads(history)
-            response = TextSendMessage(text=data)
         case _ if input_text.startswith("setDB:"):
             name = input_text[len("setDB:"):]
             pinecone_index_name = name +"db"
@@ -105,10 +102,21 @@ def handle_text_message(event):
         case "更新notion":
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="notion連結", text="notion連結")),
-                QuickReplyButton(action=MessageAction(label="新增notion", text="新增notion"))
-            ]))
-        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷" |"notion連結" | "新增notion":
+                QuickReplyButton(action=MessageAction(label="輸入你的Notion API key", text="輸入你的Notion API key, please follow the format: NotionAPI: your key")),
+                QuickReplyButton(action=MessageAction(label="輸入Notion database key", text="輸入Notion database key")),
+                QuickReplyButton(action=MessageAction(label="將剛才的訊息加入Notion", text="將剛才的訊息加入Notion"))
+            ])) 
+        case "輸入你的Notion API key":
+            key = event.message.text
+            redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", key)
+        case "輸入Notion database key":
+            key= event.message.text
+            redis_handler.rds.hset(f"user:{user_id}", "notion_db_id", key)
+        case "將剛才的訊息加入Notion":
+            notion_handler = Notion_handler(user_id)
+            notion_handler.notion_test()
+            response = TextSendMessage(text="建立完成")
+        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
             response = TextSendMessage(text="尚未完成服務")
         case _:
             try:
