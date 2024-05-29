@@ -1,5 +1,9 @@
 *.env
 *.txt
+<<<<<<< HEAD
 venv/
 db.json
 *.md
+=======
+venv/
+>>>>>>> David
