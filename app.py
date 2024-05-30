@@ -100,12 +100,40 @@ def handle_text_message(event):
                 QuickReplyButton(action=MessageAction(label="查看日歷", text="查看日歷"))
             ]))
         case "更新notion":
-            response = TextSendMessage("選擇服務項目",
-            quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="輸入Notion API key", text="輸入Notion API key")),
-                QuickReplyButton(action=MessageAction(label="輸入database key", text="輸入database key")),
-                QuickReplyButton(action=MessageAction(label="建立Notion", text="建立Notion"))
-            ])) 
+            response = TemplateSendMessage(
+                alt_text='選擇服務項目',
+                template=ButtonsTemplate(
+                    title='更新notion',
+                    text='選擇服務項目',
+                    actions=[
+                        PostbackAction(
+                            label='輸入Notion API key',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='\nNotionAPI:'
+                        ),
+                        PostbackAction(
+                            label='輸入database key',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='\ndb:'
+                        ),
+                        PostbackAction(
+                            label='建立Notion',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='\n建立Notion'
+                        )
+                        
+                    ]
+                )
+            )
+            # response = TextSendMessage("選擇服務項目",
+            # quick_reply=QuickReply(items=[
+            #     QuickReplyButton(action=MessageAction(label="輸入Notion API key", text="輸入Notion API key")),
+            #     QuickReplyButton(action=MessageAction(label="輸入database key", text="輸入database key")),
+            #     QuickReplyButton(action=MessageAction(label="建立Notion", text="建立Notion"))
+            # ])) 
             
         case "輸入Notion API key":
             response = TextSendMessage(text="輸入你的Notion API key, please follow the format: NotionAPI:your key")
