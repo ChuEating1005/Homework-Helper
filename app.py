@@ -110,19 +110,19 @@ def handle_text_message(event):
                             label='輸入Notion API key',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='\nNotionAPI:'
+                            fill_in_text='NotionAPI:'
                         ),
                         PostbackAction(
                             label='輸入database key',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='\ndb:'
+                            fill_in_text='db:'
                         ),
                         PostbackAction(
                             label='建立Notion',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='\n建立Notion'
+                            fill_in_text='建立Notion\ndate:\nhw:\nsubject:\ntext:'
                         )
                         
                     ]
