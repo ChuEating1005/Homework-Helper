@@ -80,6 +80,23 @@ def handle_text_message(event):
     input_text = event.message.text 
     response = ""
     match input_text:
+        case "註冊":
+            response = TemplateSendMessage(
+                alt_text='註冊',
+                template=ButtonsTemplate(
+                    title='註冊notion',
+                    text='可以儲存一些資料到db',
+                    actions=[
+                        PostbackAction(
+                            label='我要註冊',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='setDB:(替換成你的英文名字)'
+                        )
+                        
+                    ]
+                )
+            )
         case _ if input_text.startswith("setDB:"):
             name = input_text[len("setDB:"):]
             pinecone_index_name = name +"db"
@@ -91,7 +108,7 @@ def handle_text_message(event):
             response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
         case "問問題":
             response = TextSendMessage(text="你有啥問題")
-        case "更新google日歷":
+        case "更新日歷":
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日歷連結", text="日歷連結")),
