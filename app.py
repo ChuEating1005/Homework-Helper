@@ -108,7 +108,7 @@ def handle_text_message(event):
             response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
         case "問問題":
             response = TextSendMessage(text="你有啥問題")
-        case "更新google日歷":
+        case "更新日歷":
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日歷連結", text="日歷連結")),
