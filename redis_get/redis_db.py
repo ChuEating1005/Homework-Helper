@@ -16,7 +16,7 @@ class RedisHandler():
         })
         
     def get_user_name(self,user_id):
-        return self.rds.hget(f'user:{user_id}','user_name')
+        return self.rds.hget(f'user_testbot:{user_id}','user_name')
 
     def get_user_pinecone_index_name(self,user_id):
         return self.rds.hget(f'user:{user_id}','pinecone_index_name')
