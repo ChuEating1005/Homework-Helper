@@ -26,13 +26,15 @@ app.py是主程式、openAI_utils.py是連openai的
 
 這樣就會直接推送到Heroku，等待運行完成（可能需要一些時間）後，LineBot就會更新。如果推送完成後發現LineBot沒有反應，可以在終端輸入以下命令查看錯誤日誌：
 ```sh
-heroku logs --tail
+heroku logs --tail -a hwhelper
 ```
 
 ## 當前功能
 
 - 可以通過聊天室直接與LineBot對話，但對話記錄功能尚未完成，只能進行單次對話。
 - 可以直接詢問之前上傳的PDF檔案的內容（數值方法assignment1-4，密碼工程critique）。
+- 也可以上傳PDF，有存個人的
+- 可以編輯notion，但我不太會用
 
 ### 上傳PDF檔案的方法
 
