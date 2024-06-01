@@ -168,7 +168,6 @@ def handle_text_message(event):
             minute = minute[len("minute:"):]
             hw = hw[len("hw:"):]
             text = text[len("text:"):]
-            notion_handler.notion_test()
             date = notion_handler.date_format(year, month, day, hour, minute)
             data_format = notion_handler.data_format(hw, date)
             notion_handler.create_page(data_format, text)
