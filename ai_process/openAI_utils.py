@@ -1,7 +1,7 @@
 import os
 import re
 import openai
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from langchain_community.chat_models import ChatOpenAI
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone
@@ -46,8 +46,6 @@ class OpenAIHandler:
     def create_index(self):
         pinecone = PineconeClient(api_key=self.PINECONE_API_KEY)
         index_name = self.PINECONE_INDEX_NAME
-        print(index_name)
-        #print(index_name)
         if index_name not in pinecone.list_indexes().names():
             pinecone.create_index(
                 name=index_name,
@@ -60,27 +58,8 @@ class OpenAIHandler:
             )
         index = pinecone.Index(index_name)
         return index
-    # Define a function to create embeddings
-    def create_embeddings(self,texts):
-        openai.api_key = self.OPENAI_API_KEY
-        embeddings_list = []
-        for text in texts:
-            res = openai.Embedding.create(input=[text.page_content], engine=self.MODEL)
-            embeddings_list.append(res['data'][0]['embedding'])
-        return embeddings_list
-
-    # def find_match(self,input_text, num, index):
-    #     input_em = self.create_embeddings([Document(page_content=input_text, metadata={})])
-    #     result = index.query(vector=input_em[0], top_k=num, include_metadata=True)
-    #     matches = result['matches']
-    #     matched_texts = "\n".join([match['metadata']['text'] for match in matches])
-    #     return matched_texts
-
-    def create_chain(self,vectorStore, user_id):
-        model = ChatOpenAI(
-            model="gpt-3.5-turbo-1106",
-            temperature=0.4
-        )
+    def create_memory(self,user_id):
+        # Create a redis chat message history
         redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
         name = redis_handler.get_user_name(user_id)
         history = RedisChatMessageHistory(
@@ -88,15 +67,51 @@ class OpenAIHandler:
             url=REDIS_URL
         )
         
-
+        # Create a conversation buffer memory
         memory = ConversationBufferMemory(
             memory_key="chat_history",
             input_key="input",
             return_messages=True,
             chat_memory=history,
         )
+        return memory
+    def create_memory(self,user_id):
+        # Create a redis chat message history
+        redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
+        name = redis_handler.get_user_name(user_id)
+        history = RedisChatMessageHistory(
+            session_id=name, 
+            url=REDIS_URL
+        )
         
+        # Create a conversation buffer memory
+        memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            input_key="input",
+            return_messages=True,
+            chat_memory=history,
+        )
+        return memory
+    
+    def create_chain(self,vectorStore, memory):
+        model = ChatOpenAI(
+            model="gpt-3.5-turbo-1106",
+            temperature=0.4
+        )
+
         prompt = ChatPromptTemplate.from_messages([
+            ("system","""
+                Goal: You are an efficient homework assistant, helping users complete their homework, providing relevant information and suggestions, and effectively interacting with Notion and Google Calendar.
+                Main Functions:
+                1. Answer Questions: Answer users' questions about homework, including theoretical explanations, tool usage, references, etc.
+                2. Provide Tools and Website Recommendations: Recommend suitable tools, websites, and references based on homework requirements.
+                3. Time Management: Read the user's Google Calendar events, suggest the best time to complete homework, and add related tasks to the calendar.
+                4. Record and Manage: Write Q&A records and to-do items into Notion for easy user viewing and management.
+                Requirements:
+                1. Accurate Answers to Users' Questions: The model needs to have sufficient knowledge to answer various homework-related questions.
+                2. Recommend Relevant Resources: Provide users with the necessary tools, websites, references, etc., to help them complete their homework.
+                3. Effective Time Management: Suggest reasonable time to complete homework based on the user's schedule and record tasks in the calendar and Notion.
+                4. Integrate APIs: Implement integration with Notion and Google Calendar APIs for data reading and writing operations."""),
             ("system", "Answer the user's questions based on the context: {context}"),
             MessagesPlaceholder(variable_name="chat_history"),
             ("user", "{input}")
@@ -153,10 +168,13 @@ class OpenAIHandler:
 
     def process_chat(self,chain, question):
         response = chain.invoke({
-            "input": question,
+            "input": question
         })
         return response["answer"]["text"]
-    
+
+    def refresh_memory(self,memory):
+        memory.clear()
+        
     def handle_conversation(self,user_id,user_input):
         # query = "Assignment 3 有什麼問題？"
         # context = find_match(query)
@@ -165,8 +183,9 @@ class OpenAIHandler:
         # answer = chain.invoke({"context": context_docs, "question": query})
         # print(answer)
         index = self.create_index()
+        memory = self.create_memory(user_id)
         embeddings = OpenAIEmbeddings(model=self.MODEL, openai_api_key=self.OPENAI_API_KEY)
         vectorStore = Pinecone.from_existing_index(index_name=self.PINECONE_INDEX_NAME, embedding=embeddings)
-        chain = self.create_chain(vectorStore, user_id)
+        chain = self.create_chain(vectorStore, memory)
         response = self.process_chat(chain, user_input)
         return response

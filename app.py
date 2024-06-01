@@ -10,7 +10,7 @@ import tempfile
 from ai_process.openAI_utils import OpenAIHandler
 from redis_get.redis_db import RedisHandler
 from notion_process.NotionAPI import Notion_handler
-from calandar_process import CalandarUtils
+from calandar_process.CalandarUtils import CalandarUtils
 from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 #執行檔案
 app = Flask(__name__)
@@ -18,7 +18,7 @@ app = Flask(__name__)
 #初始化handler
 
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
-
+calandar = CalandarUtils()
 # 必須放上自己的Channel Access Token
 
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
@@ -111,7 +111,8 @@ def handle_text_message(event):
         case "問問題":
             response = TextSendMessage(text="你有啥問題")
         case "更新日曆":
-            if not calandar.initialized: calandar.initialize(redis_handler.get_user_pinecone_index_name(user_id))
+            if not calandar.initialized: 
+                calandar.initialize(redis_handler.get_user_pinecone_index_name(user_id))
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日曆連結", text="日曆連結")),
