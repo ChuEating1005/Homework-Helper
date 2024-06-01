@@ -2,6 +2,7 @@
 #載入LineBot所需要的套件
 from flask import Flask, request, abort
 import os
+import re # for string operation
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
@@ -160,8 +161,9 @@ def handle_text_message(event):
         case _ if input_text.startswith("建立Notion"):
             notion_handler = Notion_handler(user_id)
             # notion_handler.notion_test()
-            date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
-            response = TextSendMessage(text="date set")
+            string = redis_handler.get_chat_history(user_id)
+            response = TextSendMessage(text=string)
+            # date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
             # data_format = notion_handler.data_format(input_text[len("hw:"):], date)
             # notion_handler.create_page(data_format, input_text[len("text:"):])
             # response = TextSendMessage(text="建立成功")
