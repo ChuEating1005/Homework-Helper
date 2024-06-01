@@ -152,7 +152,12 @@ class Notion_handler:
                 }
         res = requests.patch(url, headers=self.headers, json=payload)
         return res.status_code
-    def date_format(self, year, month, day, hour, minute):
+    def date_format(self, year: str, month: str, day: str, hour: str, minute: str):
+        year = int(year)
+        month = int(month)
+        day = int(day)
+        hour = int(hour)
+        minute = int(minute)
         deadline = datetime(year, month, day, hour, minute).astimezone(timezone.utc).isoformat()
         return deadline
     

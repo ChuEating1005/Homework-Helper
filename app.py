@@ -139,7 +139,7 @@ def handle_text_message(event):
                             label='建立Notion',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='建立Notion\ndate:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
+                            fill_in_text='建立Notion\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
                         ),
                         PostbackAction(
                             label='更新Notion已存在頁面',
