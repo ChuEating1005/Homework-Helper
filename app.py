@@ -110,7 +110,8 @@ def handle_text_message(event):
         case "問問題":
             response = TextSendMessage(text="你有啥問題")
         case "更新日曆":
-            if not calandar.initialized: calandar.initialize(redis_handler.get_user_pinecone_index_name(user_id))
+            if not calandar.initialized: 
+                calandar.initialize(redis_handler.get_user_pinecone_index_name(user_id))
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日曆連結", text="日曆連結")),
