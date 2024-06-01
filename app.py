@@ -145,7 +145,7 @@ def handle_text_message(event):
                             label='更新Notion已存在頁面',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='是否保存原頁面text:\n要更改的頁面原本名稱:\n\ndate:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
+                            fill_in_text='更新Notion已存在頁面\n是否保存原頁面text:\n要更改的頁面原本名稱:\n\ndate:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
                         )
                     ]
                 )
@@ -159,12 +159,12 @@ def handle_text_message(event):
             
         case _ if input_text.startswith("建立Notion"):
             notion_handler = Notion_handler(user_id)
-            notion_handler.notion_test()
+            # notion_handler.notion_test()
             date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
-            data_format = notion_handler.data_format(input_text[len("hw:"):], date)
-            notion_handler.create_page(data_format, input_text[len("text:"):])
-            text = "year ="+input_text[len("year:"):] + ", month ="+ input_text[len("month:"):] + ", day =" + input_text[len("day:"):] + ", hour =" + input_text[len("hour:"):] + ", minute ="+  input_text[len("minute:"):] + ",  hw = "+ input_text[len("hw:"):] + " text = "+ input_text[len("text:"):] + "\n"
-            response = TextSendMessage(text=text)
+            response = TextSendMessage(text="date set")
+            # data_format = notion_handler.data_format(input_text[len("hw:"):], date)
+            # notion_handler.create_page(data_format, input_text[len("text:"):])
+            # response = TextSendMessage(text="建立成功")
         case _ if input_text.startswith("更新Notion已存在頁面"):
             notion_handler = Notion_handler(user_id)
             date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
@@ -188,7 +188,7 @@ def handle_text_message(event):
                 response= TextSendMessage(text=f"Failed to text: {str(e)}")
                 
     #傳結果訊息給使用者
-    line_bot_api.reply_message(event.reply_token,response)
+    line_bot_api.reply_message(event.reply_token, response)
 
 #主程式
 import os
