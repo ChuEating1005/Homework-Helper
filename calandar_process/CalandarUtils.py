@@ -43,8 +43,8 @@ class CalandarUtils:
     # return: The string response of estimate time with description
     #   Save a list of HomeworkTask at self.tasks
     def estimate_task_time(self, question: str) -> str:
-        response = self.llm.handle_conversation("Estimate how much time you need to finish '" + question + "'. Estimate each task and reply in minutes.")
-        formattedResponse = self.llm.handle_conversation("Format above estimation into 'homework name$$task description$$time taken in minutes, only numbers'. Seperated by double dollar sign is required. Seperate each task with a new line.")
+        response = self.llm.handle_conversation("Estimate how much time you need to finish \'" + question + "\'. Estimate each task and reply in minutes.")
+        formattedResponse = self.llm.handle_conversation("Format above estimation into \'homework name$$task description$$time taken in minutes, only numbers\'. Seperated by double dollar sign is required. Seperate each task with a new line.")
         #print(formattedResponse)
         
         result = []
