@@ -113,12 +113,12 @@ class CalandarUtils:
                         break
             
     
-if __name__ == '__main__':
-    calandar = CalandarUtils()    
-    print(calandar.estimate_task_time("Numeric Method"))
-    print('---')
-    for i in calandar.tasks:
-        print(i)        
-    print('---')
-    calandar.add_to_calandar()
+# if __name__ == '__main__':
+#     calandar = CalandarUtils()    
+#     print(calandar.estimate_task_time("Numeric Method"))
+#     print('---')
+#     for i in calandar.tasks:
+#         print(i)        
+#     print('---')
+#     calandar.add_to_calandar()
     
