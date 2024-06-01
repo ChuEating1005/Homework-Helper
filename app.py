@@ -172,7 +172,7 @@ def handle_text_message(event):
                             label='輸入',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='calandar:(替換成你的英文名字)'
+                            fill_in_text='calandar:(要查詢的作業)'
                         )
                         
                     ]
@@ -180,10 +180,10 @@ def handle_text_message(event):
             )
             
         case _ if input_text.startswith("calandar:"):
-            try:
-                response= TextSendMessage(text=calandar.estimate_task_time(input_text[len("calandar:"):]))
-            except Exception as e:
-                response= TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
+            #try:
+                response = TextSendMessage(text=calandar.estimate_task_time(input_text[len("calandar:"):]))
+            #except Exception as e:
+                #response = TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
             
         case "上傳至日曆":
             response = TextSendMessage("上傳前要先估計作業耗時喔，是否確認上傳？",
