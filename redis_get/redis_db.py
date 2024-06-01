@@ -1,5 +1,6 @@
 import redis
 import json
+
 class RedisHandler():
     def __init__(self,host,port,password) :
         self.rds = redis.Redis(host=host,
@@ -27,6 +28,7 @@ class RedisHandler():
         return self.rds.hget(f'user:{user_id}','notion_api_key')
     def get_notion_db_id(self,user_id):
         return self.rds.hget(f'user:{user_id}','notion_db_id')
+    
         
     #TODO: 抓取最後一筆對話的文字 拜託
     # def get_last_history(self,user_id):
