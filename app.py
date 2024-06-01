@@ -168,9 +168,9 @@ def handle_text_message(event):
             minute = re.findall(r'minute:([a-zA-Z]+)', minute.strip('\n'))
             hw = re.findall(r'hw:([a-zA-Z]+)', hw.strip('\n'))
             text = re.findall(r'text:([a-zA-Z]+)', text.strip('\n'))
-            date = notion_handler.date_format(year, month, day, hour, minute)
-            data_format = notion_handler.data_format(hw, date)
-            notion_handler.create_page(data_format, text)
+            date = notion_handler.date_format(year[0], month[0], day[0], hour[0], minute[0])
+            data_format = notion_handler.data_format(hw[0], date)
+            notion_handler.create_page(data_format, text[0])
             response = TextSendMessage(text="建立成功")
         case _ if input_text.startswith("更新Notion已存在頁面"):
             notion_handler = Notion_handler(user_id)
