@@ -1,14 +1,10 @@
 from datetime import datetime, timezone, timedelta
 import os.path
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+from GoogleCalandarInterface import GoogleCalandarInterface
 from dotenv import load_dotenv
-from openAI_utils import LineBotHandler
-from config import LINEBOT_API_KEY, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME
+from ai_process.openAI_utils import OpenAIHandler
+from config import LINEBOT_API_KEY, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME
 
 class HomeworkTask:
     # description: Short description of a task
@@ -23,78 +19,16 @@ class HomeworkTask:
     def __str__(self) -> str:
         return f"({self.source_pdf}, {self.description}, {self.duration})"
 
-class GoogleCalandarInterface:
-    def __init__(self):
-        SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
-        
-        creds = None
-        # Try to get credentials from cache
-        if os.path.exists("calandarAPI/token.json"):
-            creds = Credentials.from_authorized_user_file("calandarAPI/token.json", SCOPES)
-            
-        # Request user to give credential if not found
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file("calandarAPI/credentials.json", SCOPES)
-                creds = flow.run_local_server(port=0)
-                
-        # Save the credentials for the next run
-        with open("calandarAPI/token.json", "w") as token:
-            token.write(creds.to_json())
-
-        # Building the calandar service
-        try:
-            service = build("calendar", "v3", credentials=creds)
-            self.service = service            
-        except HttpError as error:
-            print(f"An error occurred: {error}")
-    
-    #return (start time, end time) of events before deadline
-    def get_events_time_before(self, deadline: datetime) -> list:
-        events_result = (
-            self.service.events().list(
-                calendarId="primary",
-                maxResults=10,
-                timeMin=datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z",
-                timeMax=deadline.astimezone(timezone.utc).replace(tzinfo=None).isoformat() + "Z",
-                singleEvents=True,
-                orderBy="startTime",
-            ).execute()
-        )
-        events = events_result.get("items", [])
-        
-        return [(datetime.fromisoformat(event['start']['dateTime']).replace(tzinfo=None), datetime.fromisoformat(event['end']['dateTime']).replace(tzinfo=None)) for event in events]
-    
-    # startTime: Time when the event begins in current time zone
-    def add_event(self, startTime: datetime, task: HomeworkTask):
-        endTime = startTime + timedelta(minutes=task.duration)
-        event = {
-            'summary': "[Homework Helper] " + task.source_pdf,
-            'description': task.description,
-            'start': {
-                'dateTime': startTime.astimezone(timezone.utc).replace(tzinfo=None).isoformat(),
-                'timeZone': 'Etc/UTC'
-            },
-            'end': {
-                'dateTime': endTime.astimezone(timezone.utc).replace(tzinfo=None).isoformat(),
-                'timeZone': 'Etc/UTC'
-            },
-        }
-
-        event = self.service.events().insert(calendarId='primary', body=event).execute()
-
 class CalandarUtils:
-    def __init__(self):
-        self.llm = LineBotHandler(
+    def __init__(self, pinecone_index_name):
+        self.llm = OpenAIHandler(
             PINECONE_API_KEY, 
-            PINECONE_ENVIRONMENT,
-            PINECONE_INDEX_NAME,
+            PINECONE_ENVIRONMENT, 
+            pinecone_index_name,
             OPENAI_API_KEY,
             MODEL_NAME
         )
-        
+        self.pinecone_index_name = pinecone_index_name
         self.tasks = []
     
     # question: A string naming which homework or task is the target
@@ -119,14 +53,14 @@ class CalandarUtils:
     # homework: A single homework
     # return: Deadline of the homework
     def get_homework_deadline(self, homework: str) -> datetime:
-        llm = LineBotHandler(
+        llm = OpenAIHandler(
             PINECONE_API_KEY, 
-            PINECONE_ENVIRONMENT,
-            PINECONE_INDEX_NAME,
+            PINECONE_ENVIRONMENT, 
+            self.pinecone_index_name,
             OPENAI_API_KEY,
             MODEL_NAME
         )
-        llm.chat_history += ''
+        
         response = llm.handle_conversation('What is the deadline of ' + homework + '?. Reply with only Month/Date, in format such as "2/28"')
         
         month, date = map(int, response.split('/'))
@@ -172,8 +106,6 @@ class CalandarUtils:
                         curr = currEnd
                         break
             
-            
-        
     
 if __name__ == '__main__':
     calandar = CalandarUtils()    
