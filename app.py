@@ -163,7 +163,7 @@ def handle_text_message(event):
             # date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
             # data_format = notion_handler.data_format(input_text[len("hw:"):], date)
             # notion_handler.create_page(data_format, input_text[len("text:"):])
-            text = f"year = {input_text[len("year:"):]}, month = {input_text[len("month:"):]}, day = {input_text[len("day:"):]}, hour = {input_text[len("hour:"):]}, minute = {input_text[len("minute:"):]},  hw = {input_text[len("hw:"):]},  text = {input_text[len("text:"):]}\n"
+            text = "year ="+input_text[len("year:"):] + ", month ="+ input_text[len("month:"):] + ", day =" + input_text[len("day:"):] + ", hour =" + input_text[len("hour:"):] + ", minute ="+  input_text[len("minute:"):] + ",  hw = "+ input_text[len("hw:"):] + " text = "+ input_text[len("text:"):] + "\n"
             response = TextSendMessage(text=text)
         case "更新Notion已存在頁面":
             notion_handler = Notion_handler(user_id)
