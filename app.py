@@ -160,20 +160,20 @@ def handle_text_message(event):
         case "建立Notion":
             notion_handler = Notion_handler(user_id)
             # notion_handler.notion_test()
-            date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
-            data_format = notion_handler.data_format(input_text[len("hw:"):], date)
-            notion_handler.create_page(data_format, input_text[len("text:"):])
+            # date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
+            # data_format = notion_handler.data_format(input_text[len("hw:"):], date)
+            # notion_handler.create_page(data_format, input_text[len("text:"):])
             response = TextSendMessage(text="建立完成")
         case "更新Notion已存在頁面":
             notion_handler = Notion_handler(user_id)
-            date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
-            data_format = notion_handler.data_format(input_text[len("hw:"):], date)
-            page_id = notion_handler.get_page_id_by_name(input_text[len("要更改的頁面原本名稱:"):])
-            if input_text[len("是否保存原頁面text:"):] == "是":
-                erase_origin = False
-            else:
-                erase_origin = True
-            notion_handler.update_page(page_id=page_id, data=data_format, text=input_text[len("text:"):], erase_origin=erase_origin)
+            # date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
+            # data_format = notion_handler.data_format(input_text[len("hw:"):], date)
+            # page_id = notion_handler.get_page_id_by_name(input_text[len("要更改的頁面原本名稱:"):])
+            # if input_text[len("是否保存原頁面text:"):] == "是":
+            #     erase_origin = False
+            # else:
+            #     erase_origin = True
+            # notion_handler.update_page(page_id=page_id, data=data_format, text=input_text[len("text:"):], erase_origin=erase_origin)
             response = TextSendMessage(text="更新完成")
         case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
             response = TextSendMessage(text="尚未完成服務")
