@@ -110,6 +110,7 @@ class OpenAIHandler:
             memory=memory
         )
 
+
         retriever = vectorStore.as_retriever(search_kwargs={"k": 5})
 
         retriever_prompt = ChatPromptTemplate.from_messages([
