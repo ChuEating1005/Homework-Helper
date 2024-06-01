@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 import os.path
 
-from GoogleCalandarInterface import GoogleCalandarInterface
+from GoogleCalendarInterface import GoogleCalendarInterface
 from dotenv import load_dotenv
 from ai_process.openAI_utils import OpenAIHandler
 from config import LINEBOT_API_KEY, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME
@@ -88,7 +88,7 @@ class CalandarUtils:
         self.tasks.sort(key=lambda x: task_deadline[x.source_pdf])
         
         # Decode available time
-        calandar = GoogleCalandarInterface()
+        calandar = GoogleCalendarInterface()
         occupied_times = calandar.get_events_time_before(task_deadline[self.tasks[-1].source_pdf] + timedelta(days=7))
         occupied_times.append((datetime.now() + timedelta(days=3650), datetime.now() + timedelta(days=3650)))
         
