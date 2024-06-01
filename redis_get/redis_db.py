@@ -28,7 +28,11 @@ class RedisHandler():
         return self.rds.hget(f'user:{user_id}','notion_api_key')
     def get_notion_db_id(self,user_id):
         return self.rds.hget(f'user:{user_id}','notion_db_id')
-    
+    def set_notion_db_id(self, user_id, input_text):
+        self.rds.hset(f"user:{user_id}", "notion_db_id", input_text)
+    def set_notion_api_key(self, user_id, input_text):
+        self.rds.hset(f"user:{user_id}", "notion_api_key", input_text)
+        
         
     #TODO: 抓取最後一筆對話的文字 拜託
     # def get_last_history(self,user_id):

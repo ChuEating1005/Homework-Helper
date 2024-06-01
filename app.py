@@ -153,10 +153,10 @@ def handle_text_message(event):
             )
             
         case _ if input_text.startswith("NotionAPI:"):
-            redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", input_text[len("NotionAPI:"):])
+            redis_handler.set_notion_api_key(user_id, input_text[len("NotionAPI:"):])
             
         case _ if input_text.startswith("db:"):
-            redis_handler.rds.hset(f"user:{user_id}", "notion_db_id", input_text[len("db:"):])
+            redis_handler.set_notion_db_id(user_id, input_text[len("db:"):])
             
         case _ if input_text.startswith("建立Notion"):
             notion_handler = Notion_handler(user_id)
@@ -172,20 +172,19 @@ def handle_text_message(event):
             date = notion_handler.date_format(year, month, day, hour, minute)
             data_format = notion_handler.data_format(hw, date)
             notion_handler.create_page(data_format, text)
-            res = year + month+day+hour+minute+hw+text
-            response = TextSendMessage(text=res)
+            response = TextSendMessage(text="Notion已建立")
         case _ if input_text.startswith("更新Notion已存在頁面"):
             notion_handler = Notion_handler(user_id)
             _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
-            keep = re.findall(r'是否保存原頁面text:([a-zA-Z]+)', year.strip('\n'))
-            origin_name = re.findall(r'要更改的頁面原本名稱:([a-zA-Z]+)', year.strip('\n'))
-            year = re.findall(r'year:([a-zA-Z]+)', year.strip('\n'))
-            month = re.findall(r'month:([a-zA-Z]+)', month.strip('\n'))
-            day = re.findall(r'day:([a-zA-Z]+)', day.strip('\n'))
-            hour = re.findall(r'hour:([a-zA-Z]+)', hour.strip('\n'))
-            minute = re.findall(r'minute:([a-zA-Z]+)', minute.strip('\n'))
-            hw = re.findall(r'hw:([a-zA-Z]+)', hw.strip('\n'))
-            text = re.findall(r'text:([a-zA-Z]+)', text.strip('\n'))
+            keep = keep[len("keep:"):]
+            origin_name = origin_name[len("origin_name:"):]
+            year = year[len("year:"):]
+            month = month[len("month:"):]
+            day = day[len("day:"):]
+            hour = hour[len("hour:"):]
+            minute = minute[len("minute:"):]
+            hw = hw[len("hw:"):]
+            text = text[len("text:"):]
             date = notion_handler.date_format(year, month, day, hour, minute)
             data_format = notion_handler.data_format(hw, date)
             page_id = notion_handler.get_page_id_by_name(origin_name)
