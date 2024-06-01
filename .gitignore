@@ -1,3 +1,11 @@
+<<<<<<< HEAD
 *.env
 *.txt
 venv/
+=======
+api_key.txt
+*.sh
+.env
+chueat.py
+origin.py
+>>>>>>> 68b6911b4b4b83b098bb2cb3638a3a0a8401fda0
