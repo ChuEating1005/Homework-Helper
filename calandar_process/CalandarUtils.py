@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 import os.path
 
-from GoogleCalendarInterface import GoogleCalendarInterface
+from calandar_process.GoogleCalendarInterface import GoogleCalendarInterface
 
 from dotenv import load_dotenv
 from ai_process.openAI_utils import OpenAIHandler
