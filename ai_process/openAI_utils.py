@@ -166,13 +166,13 @@ class OpenAIHandler:
         ]
         index.upsert(vectors=records)
 
-    def process_chat(chain, question):
+    def process_chat(self,chain, question):
         response = chain.invoke({
             "input": question
         })
         return response["answer"]["text"]
 
-    def refresh_memory(memory):
+    def refresh_memory(self,memory):
         memory.clear()
         
     def handle_conversation(self,user_id,user_input):
