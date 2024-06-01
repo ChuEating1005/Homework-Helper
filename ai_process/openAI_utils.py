@@ -152,7 +152,7 @@ class OpenAIHandler:
         index.upsert(vectors=records)
 
     def process_chat(self,chain, question):
-        print(question)
+        print('process',question)
         response = chain.invoke({
             "input": question,
         })
@@ -165,10 +165,14 @@ class OpenAIHandler:
         # context_docs = [Document(page_content=text, metadata={}) for text in context.split("\n")]
         # answer = chain.invoke({"context": context_docs, "question": query})
         # print(answer)
-        print(user_input)
+        print('handle:',user_input)
         index = self.create_index()
         embeddings = OpenAIEmbeddings(model=self.MODEL, openai_api_key=self.OPENAI_API_KEY)
         vectorStore = Pinecone.from_existing_index(index_name=self.PINECONE_INDEX_NAME, embedding=embeddings)
         chain = self.create_chain(vectorStore, user_id)
-        response = self.process_chat(chain, user_input)
+        try:
+            response = self.process_chat(chain, user_input)
+        except Exception as e:
+            print(e)
+        #response = self.process_chat(chain, user_input)
         return response
