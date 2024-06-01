@@ -46,7 +46,7 @@ class OpenAIHandler:
     def create_index(self):
         pinecone = PineconeClient(api_key=self.PINECONE_API_KEY)
         index_name = self.PINECONE_INDEX_NAME
-        print(index_name)
+        print('create',index_name)
         #print(index_name)
         if index_name not in pinecone.list_indexes().names():
             pinecone.create_index(
