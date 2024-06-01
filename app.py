@@ -10,7 +10,7 @@ import tempfile
 from ai_process.openAI_utils import OpenAIHandler
 from redis_get.redis_db import RedisHandler
 from notion_process.NotionAPI import Notion_handler
-from calandar_process import CalandarUtils
+from calandar_process.CalandarUtils import CalandarUtils
 from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 #執行檔案
 app = Flask(__name__)

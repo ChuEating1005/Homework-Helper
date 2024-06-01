@@ -21,13 +21,15 @@ class GoogleCalendarInterface():
                 "token_uri": TOKEN_URI,
                 "auth_provider_x509_cert_url": AUTH_PROVIDER_URI,
                 "client_secret": CLIENT_SECRET,
-                "redirect_uris": [
-                    REDIRECT_URIS
-                ]
+                "redirect_uris": [REDIRECT_URIS]
             }
         }
-        with open("calandarAPI/credentials.json", 'w') as json_file:
-            json.dump(data, json_file, indent=4)
+
+        try:
+            with open("calandarAPI/credentials.json", 'w') as json_file:
+                json.dump(data, json_file, indent=4)
+        except Exception as e:
+            print("Failed to write to file:", e)
             
         # Try to get credentials from cache
         if os.path.exists("calandarAPI/token.json"):

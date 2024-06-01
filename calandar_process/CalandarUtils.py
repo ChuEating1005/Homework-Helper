@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 import os.path
 
 from GoogleCalendarInterface import GoogleCalendarInterface
+
 from dotenv import load_dotenv
 from ai_process.openAI_utils import OpenAIHandler
 from config import LINEBOT_API_KEY, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME

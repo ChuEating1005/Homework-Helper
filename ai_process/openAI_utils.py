@@ -63,8 +63,10 @@ class OpenAIHandler:
     
     def create_memory(self,user_id):
         # Create a redis chat message history
+        redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
+        name = redis_handler.get_user_name(user_id)
         history = RedisChatMessageHistory(
-            session_id=user_id, 
+            session_id=name, 
             url=REDIS_URL
         )
         
