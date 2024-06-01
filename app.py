@@ -146,6 +146,7 @@ def handle_text_message(event):
                 )
             )
             
+            
         case _ if input_text.startswith("NotionAPI:"):
             redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", input_text[len("NotionAPI:"):])
             
