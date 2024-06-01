@@ -161,16 +161,22 @@ def handle_text_message(event):
         case "日曆連結":
             response = TextSendMessage(text="https://calendar.google.com/calendar/")
         case "估計作業耗時":
-            response = TextSendMessage(text="輸入你要估計的作業",
-            actions=[
-                
-                PostbackAction(
-                    label='輸入',
-                    data='action=startchat',
-                    input_option='openKeyboard',
-                    fill_in_text='calandar:(替換成作業名稱)'
+            response = TemplateSendMessage(
+                alt_text='估計',
+                template=ButtonsTemplate(
+                    title='估計作業耗時',
+                    text='輸入你要估計的作業',
+                    actions=[
+                        PostbackAction(
+                            label='輸入',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='calandar:(替換成你的英文名字)'
+                        )
+                        
+                    ]
                 )
-            ])
+            )
             
         case _ if input_text.startswith("calandar:"):
             calandar.estimate_task_time(input_text[len("calandar:"):])
