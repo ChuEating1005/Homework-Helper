@@ -8,7 +8,7 @@ import json
 from CalandarUtils import HomeworkTask
 from datetime import datetime, timezone, timedelta
 from config import CLIENT_ID, PROJECT_ID, AUTH_URI, TOKEN_URI ,AUTH_PROVIDER_URI,CLIENT_SECRET,REDIRECT_URIS
-class GoogleCalendarInterface:
+class GoogleCalendarInterface():
     def __init__(self):
         SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
         
