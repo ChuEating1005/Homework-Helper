@@ -13,23 +13,23 @@ class GoogleCalendarInterface():
         SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
         
         creds = None
-        data = {
-            "installed": {
-                "client_id": CLIENT_ID,
-                "project_id": PROJECT_ID,
-                "auth_uri": AUTH_URI,
-                "token_uri": TOKEN_URI,
-                "auth_provider_x509_cert_url": AUTH_PROVIDER_URI,
-                "client_secret": CLIENT_SECRET,
-                "redirect_uris": [REDIRECT_URIS]
-            }
-        }
+        # data = {
+        #     "installed": {
+        #         "client_id": CLIENT_ID,
+        #         "project_id": PROJECT_ID,
+        #         "auth_uri": AUTH_URI,
+        #         "token_uri": TOKEN_URI,
+        #         "auth_provider_x509_cert_url": AUTH_PROVIDER_URI,
+        #         "client_secret": CLIENT_SECRET,
+        #         "redirect_uris": [REDIRECT_URIS]
+        #     }
+        # }
 
-        try:
-            with open("calandarAPI/credentials.json", 'w') as json_file:
-                json.dump(data, json_file, indent=4)
-        except Exception as e:
-            print("Failed to write to file:", e)
+        # try:
+        #     with open("calandarAPI/credentials.json", 'w') as json_file:
+        #         json.dump(data, json_file, indent=4)
+        # except Exception as e:
+        #     print("Failed to write to file:", e)
             
         # Try to get credentials from cache
         if os.path.exists("calandarAPI/token.json"):
