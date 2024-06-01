@@ -18,7 +18,6 @@ app = Flask(__name__)
 
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 
-
 # 必須放上自己的Channel Access Token
 
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
@@ -146,7 +145,6 @@ def handle_text_message(event):
                     ]
                 )
             )
-            
             
         case _ if input_text.startswith("NotionAPI:"):
             redis_handler.rds.hset(f"user:{user_id}", "notion_api_key", input_text[len("NotionAPI:"):])
