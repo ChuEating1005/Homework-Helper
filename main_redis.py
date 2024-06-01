@@ -37,7 +37,6 @@ openai.api_key = OPENAI_API_KEY
 def create_index(user_id):
     pinecone = PineconeClient(api_key=PINECONE_API_KEY)
     index_name = user_id + "db"
-    #print(index_name)
     if index_name not in pinecone.list_indexes().names():
         pinecone.create_index(
             name=index_name,
@@ -51,41 +50,41 @@ def create_index(user_id):
     index = pinecone.Index(index_name)
     return index
 
-# Define a function to create embeddings
-def create_embeddings(texts):
-    embeddings_list = []
-    for text in texts:
-        res = openai.Embedding.create(input=[text.page_content], engine=MODEL)
-        embeddings_list.append(res['data'][0]['embedding'])
-    return embeddings_list
-
-# def find_match(input_text, num, index):
-#     input_em = create_embeddings([Document(page_content=input_text, metadata={})])
-#     result = index.query(vector=input_em[0], top_k=num, include_metadata=True)
-#     matches = result['matches']
-#     matched_texts = "\n".join([match['metadata']['text'] for match in matches])
-#     return matched_texts
-
-def create_chain(vectorStore, user_id):
-    model = ChatOpenAI(
-        model="gpt-3.5-turbo-1106",
-        temperature=0.4
-    )
-
+def create_memory(user_id):
+    # Create a redis chat message history
     history = RedisChatMessageHistory(
         session_id=user_id, 
         url=REDIS_URL
     )
     
-
+    # Create a conversation buffer memory
     memory = ConversationBufferMemory(
         memory_key="chat_history",
         input_key="input",
         return_messages=True,
         chat_memory=history,
     )
-    
+    return memory
+
+def create_chain(vectorStore, memory):
+    model = ChatOpenAI(
+        model="gpt-3.5-turbo-1106",
+        temperature=0.4
+    )
+
     prompt = ChatPromptTemplate.from_messages([
+        ("system","""
+            Goal: You are an efficient homework assistant, helping users complete their homework, providing relevant information and suggestions, and effectively interacting with Notion and Google Calendar.
+            Main Functions:
+            1. Answer Questions: Answer users' questions about homework, including theoretical explanations, tool usage, references, etc.
+            2. Provide Tools and Website Recommendations: Recommend suitable tools, websites, and references based on homework requirements.
+            3. Time Management: Read the user's Google Calendar events, suggest the best time to complete homework, and add related tasks to the calendar.
+            4. Record and Manage: Write Q&A records and to-do items into Notion for easy user viewing and management.
+            Requirements:
+            1. Accurate Answers to Users' Questions: The model needs to have sufficient knowledge to answer various homework-related questions.
+            2. Recommend Relevant Resources: Provide users with the necessary tools, websites, references, etc., to help them complete their homework.
+            3. Effective Time Management: Suggest reasonable time to complete homework based on the user's schedule and record tasks in the calendar and Notion.
+            4. Integrate APIs: Implement integration with Notion and Google Calendar APIs for data reading and writing operations."""),
         ("system", "Answer the user's questions based on the context: {context}"),
         MessagesPlaceholder(variable_name="chat_history"),
         ("user", "{input}")
@@ -144,24 +143,20 @@ def process_chat(chain, question):
     response = chain.invoke({
         "input": question
     })
-    #print(response)
     return response["answer"]["text"]
 
-# Example to process and upload PDF, and then query
+def refresh_memory(memory):
+    memory.clear()
+
 def main():
-    # query = "Assignment 3 有什麼問題？"
-    # context = find_match(query)
-    # # print("Context:", context)
-    # context_docs = [Document(page_content=text, metadata={}) for text in context.split("\n")]
-    # answer = chain.invoke({"context": context_docs, "question": query})
-    # print(answer)
     user_id = input("Enter your user ID: ")
     index = create_index(user_id)
+    memory = create_memory(user_id)
     embeddings = OpenAIEmbeddings(model=MODEL, openai_api_key=OPENAI_API_KEY)
     vectorStore = Pinecone.from_existing_index(index_name=user_id + "db", embedding=embeddings)
 
-    chain = create_chain(vectorStore, user_id)
-
+    chain = create_chain(vectorStore, memory)
+    refresh_memory(memory)
     while True:
         user_input = input("You: ")
 
@@ -178,8 +173,6 @@ def main():
             upload_pdf(index, embeddings, pdf_path)
         else:
             response = process_chat(chain, user_input)
-            #chat_history.append(HumanMessage(content=user_input))
-            #chat_history.append(AIMessage(content=response))
             print("Assistant:", response)
 
 if __name__ == "__main__":
