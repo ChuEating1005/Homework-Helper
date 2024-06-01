@@ -152,6 +152,14 @@ class Notion_handler:
                 }
         res = requests.patch(url, headers=self.headers, json=payload)
         return res.status_code
+    
+    def data_format(self, Homework, deadline):
+        data = {
+            "Homework": {"title": [{"text": {"content": Homework}}]},
+            "deadline": {"date": {"start": deadline, "end": None}},
+            "complete": {"checkbox": False}
+        }
+        return data
     def notion_test(self):
         pages = self.get_pages()
         self.iterate_data(pages)
