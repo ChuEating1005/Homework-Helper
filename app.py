@@ -146,7 +146,7 @@ def handle_text_message(event):
                             label='更新Notion已存在頁面',
                             data='action=startchat',
                             input_option='openKeyboard',
-                            fill_in_text='更新Notion已存在頁面\n是否保存原頁面text:\n要更改的頁面原本名稱:\n\ndate:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
+                            fill_in_text='更新Notion已存在頁面\n是否保存原頁面text:\n要更改的頁面原本名稱:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
                         )
                     ]
                 )
@@ -174,15 +174,16 @@ def handle_text_message(event):
             response = TextSendMessage(text="建立成功")
         case _ if input_text.startswith("更新Notion已存在頁面"):
             notion_handler = Notion_handler(user_id)
-            string = input_text.split("\n")
-            date = notion_handler.date_format(input_text[len("year:"):], input_text[len("month:"):], input_text[len("day:"):], input_text[len("hour:"):], input_text[len("minute:"):])
-            data_format = notion_handler.data_format(input_text[len("hw:"):], date)
-            page_id = notion_handler.get_page_id_by_name(input_text[len("要更改的頁面原本名稱:"):])
-            if input_text[len("是否保存原頁面text:"):] == "是":
+            _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
+            # 更新Notion已存在頁面\n是否保存原頁面text:\n要更改的頁面原本名稱:\n\ndate:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
+            date = notion_handler.date_format(year, month, day, hour, minute)
+            data_format = notion_handler.data_format(hw, date)
+            page_id = notion_handler.get_page_id_by_name(origin_name)
+            if keep == "是":
                 erase_origin = False
             else:
                 erase_origin = True
-            notion_handler.update_page(page_id=page_id, data=data_format, text=input_text[len("text:"):], erase_origin=erase_origin)
+            notion_handler.update_page(page_id=page_id, data=data_format, text=text, erase_origin=erase_origin)
             response = TextSendMessage(text="更新完成")
         case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
             response = TextSendMessage(text="尚未完成服務")
