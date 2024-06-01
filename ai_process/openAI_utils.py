@@ -1,7 +1,7 @@
 import os
 import re
 import openai
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from langchain_community.chat_models import ChatOpenAI
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Pinecone
@@ -46,8 +46,6 @@ class OpenAIHandler:
     def create_index(self):
         pinecone = PineconeClient(api_key=self.PINECONE_API_KEY)
         index_name = self.PINECONE_INDEX_NAME
-        print(index_name)
-        #print(index_name)
         if index_name not in pinecone.list_indexes().names():
             pinecone.create_index(
                 name=index_name,
@@ -60,7 +58,6 @@ class OpenAIHandler:
             )
         index = pinecone.Index(index_name)
         return index
-    
     def create_memory(self,user_id):
         # Create a redis chat message history
         redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
@@ -78,6 +75,24 @@ class OpenAIHandler:
             chat_memory=history,
         )
         return memory
+    def create_memory(self,user_id):
+        # Create a redis chat message history
+        redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
+        name = redis_handler.get_user_name(user_id)
+        history = RedisChatMessageHistory(
+            session_id=name, 
+            url=REDIS_URL
+        )
+        
+        # Create a conversation buffer memory
+        memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            input_key="input",
+            return_messages=True,
+            chat_memory=history,
+        )
+        return memory
+    
     def create_chain(self,vectorStore, memory):
         model = ChatOpenAI(
             model="gpt-3.5-turbo-1106",
@@ -151,13 +166,13 @@ class OpenAIHandler:
         ]
         index.upsert(vectors=records)
 
-    def process_chat(self,chain, question):
+    def process_chat(chain, question):
         response = chain.invoke({
-            "input": question,
+            "input": question
         })
         return response["answer"]["text"]
-    
-    def refresh_memory(self,memory):
+
+    def refresh_memory(memory):
         memory.clear()
         
     def handle_conversation(self,user_id,user_input):
@@ -171,6 +186,6 @@ class OpenAIHandler:
         memory = self.create_memory(user_id)
         embeddings = OpenAIEmbeddings(model=self.MODEL, openai_api_key=self.OPENAI_API_KEY)
         vectorStore = Pinecone.from_existing_index(index_name=self.PINECONE_INDEX_NAME, embedding=embeddings)
-        chain = self.create_chain(vectorStore, user_id)
+        chain = self.create_chain(vectorStore, memory)
         response = self.process_chat(chain, user_input)
         return response

@@ -137,19 +137,19 @@ class GoogleCalendarInterface():
         #     print("Failed to write to file:", e)
             
         # Try to get credentials from cache
-        if os.path.exists("calandarAPI/token.json"):
-            creds = Credentials.from_authorized_user_file("calandarAPI/token.json", SCOPES)
+        if os.path.exists("calandar_process/calandarAPI/token.json"):
+            creds = Credentials.from_authorized_user_file("calandar_process/calandarAPI/token.json", SCOPES)
             
         # Request user to give credential if not found
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file("calandarAPI/credentials.json", SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file('calandar_process/calandarAPI/credentials.json', SCOPES)
                 creds = flow.run_local_server(port=0)
                 
         # Save the credentials for the next run
-        with open("calandarAPI/token.json", "w") as token:
+        with open("calandar_process/calandarAPI/token.json", "w") as token:
             token.write(creds.to_json())
 
         # Building the calandar service
