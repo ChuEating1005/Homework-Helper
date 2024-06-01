@@ -26,9 +26,10 @@ class CalandarUtils:
         self.initialized = False
         self.llm = None
         self.pinecone_index_name = None
+        self.user_id = None
         self.tasks = []
     
-    def initialize(self, pinecone_index_name):
+    def initialize(self, user_id, pinecone_index_name):
         self.initialized = True
         self.llm = OpenAIHandler(
             PINECONE_API_KEY, 
@@ -37,14 +38,15 @@ class CalandarUtils:
             OPENAI_API_KEY,
             MODEL_NAME
         )
+        self.user_id = user_id
         self.pinecone_index_name = pinecone_index_name
     
     # question: A string naming which homework or task is the target
     # return: The string response of estimate time with description
     #   Save a list of HomeworkTask at self.tasks
     def estimate_task_time(self, question: str) -> str:
-        response = self.llm.handle_conversation("Estimate how much time you need to finish \'" + question + "\'. Estimate each task and reply in minutes.")
-        formattedResponse = self.llm.handle_conversation("Format above estimation into \'homework name$$task description$$time taken in minutes, only numbers\'. Seperated by double dollar sign is required. Seperate each task with a new line.")
+        response = self.llm.handle_conversation(self.user_id, "Estimate how much time you need to finish \'" + question + "\'. Estimate each task and reply in minutes.")
+        formattedResponse = self.llm.handle_conversation(self.user_id, "Format above estimation into \'homework name$$task description$$time taken in minutes, only numbers\'. Seperated by double dollar sign is required. Seperate each task with a new line.")
         #print(formattedResponse)
         
         result = []
@@ -69,7 +71,7 @@ class CalandarUtils:
             MODEL_NAME
         )
         
-        response = llm.handle_conversation('What is the deadline of ' + homework + '?. Reply with only Month/Date, in format such as "2/28"')
+        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Reply with only Month/Date, in format such as "2/28"')
         
         month, date = map(int, response.split('/'))
         
