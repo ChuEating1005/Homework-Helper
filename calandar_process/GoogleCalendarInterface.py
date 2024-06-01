@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import os
 import json
-from CalandarUtils import HomeworkTask
+from calandar_process.CalandarUtils import HomeworkTask
 from datetime import datetime, timezone, timedelta
 from config import CLIENT_ID, PROJECT_ID, AUTH_URI, TOKEN_URI ,AUTH_PROVIDER_URI,CLIENT_SECRET,REDIRECT_URIS
 class GoogleCalendarInterface():
