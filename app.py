@@ -25,6 +25,7 @@ line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
 
 handler = WebhookHandler(LINEBOT_HANDLER)
+calandar = CalandarUtils()
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
@@ -116,8 +117,8 @@ def handle_text_message(event):
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日曆連結", text="日曆連結")),
                 QuickReplyButton(action=MessageAction(label="估計作業耗時", text="估計作業耗時")),
-                QuickReplyButton(action=MessageAction(label="上傳至日曆", text="上傳至日曆"))
-                ]))
+                QuickReplyButton(action=MessageAction(label="上傳至日曆", text="上傳至日曆")),
+            ]))
         case "更新notion":
             response = TemplateSendMessage(
                 alt_text='選擇服務項目',
@@ -161,20 +162,29 @@ def handle_text_message(event):
         case "日曆連結":
             response = TextSendMessage(text="https://calendar.google.com/calendar/")
         case "估計作業耗時":
-            response = TextSendMessage(text="輸入你要估計的作業",
-            actions=[
-
-                PostbackAction(
-                    label='輸入',
-                    data='action=startchat',
-                    input_option='openKeyboard',
-                    fill_in_text='calandar:(替換成作業名稱)'
+            response = TemplateSendMessage(
+                alt_text='估計',
+                template=ButtonsTemplate(
+                    title='估計作業耗時',
+                    text='輸入你要估計的作業',
+                    actions=[
+                        PostbackAction(
+                            label='輸入',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='calandar:(替換成你的英文名字)'
+                        )
+                        
+                    ]
                 )
-            ])
-
+            )
+            
         case _ if input_text.startswith("calandar:"):
-            calandar.estimate_task_time(input_text[len("calandar:"):])
-
+            try:
+                response= TextSendMessage(text=calandar.estimate_task_time(input_text[len("calandar:"):]))
+            except Exception as e:
+                response= TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
+            
         case "上傳至日曆":
             response = TextSendMessage("上傳前要先估計作業耗時喔，是否確認上傳？",
             quick_reply=QuickReply(items=[
