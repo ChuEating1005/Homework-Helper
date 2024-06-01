@@ -18,6 +18,7 @@ app = Flask(__name__)
 
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 
+
 # 必須放上自己的Channel Access Token
 
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
