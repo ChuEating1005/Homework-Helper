@@ -156,6 +156,8 @@ class OpenAIHandler:
         response = chain.invoke({
             "input": question,
         })
+        if response["answer"]["text"] is None:
+            return "No response generated."
         return response["answer"]["text"]
     
     def handle_conversation(self,user_id,user_input):
