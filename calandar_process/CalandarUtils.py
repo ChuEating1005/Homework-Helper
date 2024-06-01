@@ -20,7 +20,14 @@ class HomeworkTask:
         return f"({self.source_pdf}, {self.description}, {self.duration})"
 
 class CalandarUtils:
-    def __init__(self, pinecone_index_name):
+    def __init__(self):
+        self.initialized = False
+        self.llm = None
+        self.pinecone_index_name = None
+        self.tasks = []
+    
+    def initialize(self, pinecone_index_name):
+        self.initialized = True
         self.llm = OpenAIHandler(
             PINECONE_API_KEY, 
             PINECONE_ENVIRONMENT, 
@@ -29,7 +36,6 @@ class CalandarUtils:
             MODEL_NAME
         )
         self.pinecone_index_name = pinecone_index_name
-        self.tasks = []
     
     # question: A string naming which homework or task is the target
     # return: The string response of estimate time with description
