@@ -161,6 +161,22 @@ def handle_text_message(event):
         case _ if input_text.startswith("建立Notion"):
             notion_handler = Notion_handler(user_id)
             _, year, month, day, hour, minute, hw, text = input_text.split('\n')
+            year = year[len("year:"):]
+            month = month[len("month:"):]
+            day = day[len("day:"):]
+            hour = hour[len("hour:"):]
+            minute = minute[len("minute:"):]
+            hw = hw[len("hw:"):]
+            text = text[len("text:"):]
+            date = notion_handler.date_format(year, month, day, hour, minute)
+            data_format = notion_handler.data_format(hw, date)
+            notion_handler.create_page(data_format, text)
+            response = TextSendMessage(text="建立成功")
+        case _ if input_text.startswith("更新Notion已存在頁面"):
+            notion_handler = Notion_handler(user_id)
+            _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
+            keep = re.findall(r'是否保存原頁面text:([a-zA-Z]+)', year.strip('\n'))
+            origin_name = re.findall(r'要更改的頁面原本名稱:([a-zA-Z]+)', year.strip('\n'))
             year = re.findall(r'year:([a-zA-Z]+)', year.strip('\n'))
             month = re.findall(r'month:([a-zA-Z]+)', month.strip('\n'))
             day = re.findall(r'day:([a-zA-Z]+)', day.strip('\n'))
@@ -168,14 +184,6 @@ def handle_text_message(event):
             minute = re.findall(r'minute:([a-zA-Z]+)', minute.strip('\n'))
             hw = re.findall(r'hw:([a-zA-Z]+)', hw.strip('\n'))
             text = re.findall(r'text:([a-zA-Z]+)', text.strip('\n'))
-            date = notion_handler.date_format(year[0], month[0], day[0], hour[0], minute[0])
-            data_format = notion_handler.data_format(hw[0], date)
-            notion_handler.create_page(data_format, text[0])
-            response = TextSendMessage(text="建立成功")
-        case _ if input_text.startswith("更新Notion已存在頁面"):
-            notion_handler = Notion_handler(user_id)
-            _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
-            # 更新Notion已存在頁面\n是否保存原頁面text:\n要更改的頁面原本名稱:\n\ndate:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
             date = notion_handler.date_format(year, month, day, hour, minute)
             data_format = notion_handler.data_format(hw, date)
             page_id = notion_handler.get_page_id_by_name(origin_name)
