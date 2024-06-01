@@ -175,8 +175,8 @@ def handle_text_message(event):
         case _ if input_text.startswith("更新Notion已存在頁面"):
             notion_handler = Notion_handler(user_id)
             _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
-            keep = keep[len("keep:"):]
-            origin_name = origin_name[len("origin_name:"):]
+            keep = keep[len("是否保存原頁面text:"):]
+            origin_name = origin_name[len("要更改的頁面原本名稱:"):]
             year = year[len("year:"):]
             month = month[len("month:"):]
             day = day[len("day:"):]
