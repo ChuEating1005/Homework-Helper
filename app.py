@@ -25,7 +25,6 @@ line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
 
 handler = WebhookHandler(LINEBOT_HANDLER)
-calandar = CalandarUtils()
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])

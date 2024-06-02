@@ -30,6 +30,7 @@ class CalandarUtils:
         self.tasks = []
     
     def initialize(self, user_id, pinecone_index_name):
+        if self.initialized: return
         self.initialized = True
         self.llm = OpenAIHandler(
             PINECONE_API_KEY, 
@@ -72,14 +73,14 @@ class CalandarUtils:
             MODEL_NAME
         )
         
-        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Do not reply anything other than Month/Date, reply in format such as "2/28"')
+        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Reply in datetime')
         
-        month, date = map(int, response.split('/'))
+        ddl = datetime.fromisoformat(response)
         
         now = datetime.now()
         year = now.year
-        if month < now.month: year += 1 # Deadline is in the next year
-        return datetime(year, month, date, 23, 59)
+        if ddl.month < now.month: year += 1 # Deadline is in the next year
+        return datetime(year, ddl.month, ddl.day, 23, 59)
               
     
     # Add self.tasks to the calandar
