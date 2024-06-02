@@ -73,7 +73,7 @@ class CalandarUtils:
             MODEL_NAME
         )
         
-        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Reply in datetime')
+        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Reply only in ISO datetime and nothing else.')
         
         ddl = datetime.fromisoformat(response)
         

@@ -114,7 +114,6 @@ def handle_text_message(event):
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日曆連結", text="日曆連結")),
                 QuickReplyButton(action=MessageAction(label="估計作業耗時", text="估計作業耗時")),
-                QuickReplyButton(action=MessageAction(label="上傳至日曆", text="上傳至日曆")),
             ]))
         case "更新notion":
             response = TemplateSendMessage(
@@ -178,21 +177,24 @@ def handle_text_message(event):
             
         case _ if input_text.startswith("calandar:"):
             try:
-                response = TextSendMessage(text=calandar.estimate_task_time(input_text[len("calandar:"):]))
+                response = TextSendMessage(
+                    text=calandar.estimate_task_time(input_text[len("calandar:"):]),
+                    quick_reply=QuickReply(
+                        items=[
+                            QuickReplyButton(action=MessageAction(label="上傳至日曆", text="上傳至日曆"))
+                        ]
+                    )
+                )
             except Exception as e:
                 response = TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
             
         case "上傳至日曆":
-            response = TextSendMessage("上傳前要先估計作業耗時喔，是否確認上傳？",
-            quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="確認上傳", text="確認上傳")),
-            ]))
-        case "確認上傳":
             #try:
                 calandar.add_to_calandar()
                 response = TextSendMessage(text="已上傳")
             #except Exception as e:
                 #response = TextSendMessage(text=f"上傳失敗: {str(e)}")
+            
         case _:
             try:
                 # 處理對話 回傳openAI的回應
