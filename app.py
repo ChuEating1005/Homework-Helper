@@ -189,11 +189,11 @@ def handle_text_message(event):
                 response = TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
             
         case "上傳至日曆":
-            #try:
+            try:
                 calandar.add_to_calandar()
                 response = TextSendMessage(text="已上傳")
-            #except Exception as e:
-                #response = TextSendMessage(text=f"上傳失敗: {str(e)}")
+            except Exception as e:
+                response = TextSendMessage(text=f"上傳失敗: {str(e)}")
             
         case _:
             try:
