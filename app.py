@@ -12,19 +12,17 @@ from redis_get.redis_db import RedisHandler
 from notion_process.NotionAPI import Notion_handler
 from calandar_process.CalandarUtils import CalandarUtils
 from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
-#執行檔案
-app = Flask(__name__)
 
 #初始化handler
-
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 calandar = CalandarUtils()
 # 必須放上自己的Channel Access Token
-
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
-
 handler = WebhookHandler(LINEBOT_HANDLER)
+
+#執行檔案
+app = Flask(__name__)
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])

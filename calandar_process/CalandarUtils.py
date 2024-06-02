@@ -87,6 +87,7 @@ class CalandarUtils:
     def add_to_calandar(self) -> None:
         # Sort task by deadline
         task_deadline = dict()
+        print(self.tasks)
         for task in self.tasks:
             if task.source_pdf not in task_deadline:
                 task_deadline[task.source_pdf] = self.get_homework_deadline(task.source_pdf)
