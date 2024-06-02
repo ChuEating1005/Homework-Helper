@@ -86,6 +86,7 @@ class CalandarUtils:
         # Sort task by deadline
         task_deadline = dict()
         for task in self.tasks:
+            print(task)
             if task.source_pdf not in task_deadline:
                 task_deadline[task.source_pdf] = self.get_homework_deadline(task.source_pdf)
         print(task_deadline)
