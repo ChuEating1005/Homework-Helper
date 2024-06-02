@@ -147,7 +147,7 @@ class GoogleCalendarInterface():
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file('calandar_process/calandarAPI/credentials.json', SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file('calandar_process/calandarAPI/credential_web.json', SCOPES)
                 creds = flow.run_local_server(port=0)
                 
         # Save the credentials for the next run
@@ -194,14 +194,4 @@ class GoogleCalendarInterface():
         }
 
         event = self.service.events().insert(calendarId='primary', body=event).execute()
-            
-    
-# if __name__ == '__main__':
-#     calandar = CalandarUtils()    
-#     print(calandar.estimate_task_time("Numeric Method"))
-#     print('---')
-#     for i in calandar.tasks:
-#         print(i)        
-#     print('---')
-#     calandar.add_to_calandar()
     
