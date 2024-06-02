@@ -58,6 +58,7 @@ class CalandarUtils:
                 pass
             
         self.tasks = result
+        print(self.tasks)
         return response
     
     # homework: A single homework
@@ -71,7 +72,7 @@ class CalandarUtils:
             MODEL_NAME
         )
         
-        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Reply with only Month/Date, in format such as "2/28"')
+        response = llm.handle_conversation(self.user_id, 'What is the deadline of ' + homework + '?. Do not reply anything other than Month/Date, reply in format such as "2/28"')
         
         month, date = map(int, response.split('/'))
         
@@ -86,7 +87,6 @@ class CalandarUtils:
         # Sort task by deadline
         task_deadline = dict()
         for task in self.tasks:
-            print(task)
             if task.source_pdf not in task_deadline:
                 task_deadline[task.source_pdf] = self.get_homework_deadline(task.source_pdf)
         print(task_deadline)
