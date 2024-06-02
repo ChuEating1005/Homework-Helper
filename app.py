@@ -202,8 +202,8 @@ def handle_text_message(event):
                 pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
                 openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
                 response = TextSendMessage(text=openaiHandler.handle_conversation(user_id,input_text))
-            except Exception as e:
-                response= TextSendMessage(text=f"Failed to text: {str(e)}")
+            #except Exception as e:
+                #response= TextSendMessage(text=f"Failed to text: {str(e)}")
                 
     #傳結果訊息給使用者
     line_bot_api.reply_message(event.reply_token,response)
