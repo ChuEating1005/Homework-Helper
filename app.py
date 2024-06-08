@@ -150,6 +150,16 @@ def handle_text_message(event):
                     ]
                 )
             )
+        case "其他功能":
+            response = TextSendMessage("選擇服務項目",
+            quick_reply=QuickReply(items=[
+                QuickReplyButton(action=MessageAction(label="清空對話紀錄", text="清空對話紀錄")),
+                QuickReplyButton(action=MessageAction(label="其他功能", text="其他功能"))
+            ]))
+            
+        case "清空對話紀錄":
+            redis_handler.refresh_memory(user_id)
+            response = TextSendMessage(text="對話紀錄已清空")
             
         case _ if input_text.startswith("NotionAPI:"):
             redis_handler.set_notion_api_key(user_id, input_text[len("NotionAPI:"):])
@@ -193,19 +203,7 @@ def handle_text_message(event):
                 erase_origin = True
             notion_handler.update_page(page_id=page_id, data=data_format, text=text, erase_origin=erase_origin)
             response = TextSendMessage(text="更新完成")
-        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
-            response = TextSendMessage(text="尚未完成服務")
-            
-        case "其他功能":
-            response = TextSendMessage("選擇服務項目",
-            quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="清空對話紀錄", text="清空對話紀錄")),
-                QuickReplyButton(action=MessageAction(label="其他功能", text="其他功能"))
-            ]))
-            
-        case "清空對話紀錄":
-            redis_handler.refresh_memory(user_id)
-            response = TextSendMessage(text="對話紀錄已清空")
+        
         case _:
             try:
                 # 處理對話 回傳openAI的回應
