@@ -202,6 +202,7 @@ def handle_text_message(event):
                 QuickReplyButton(action=MessageAction(label="清空對話紀錄", text="清空對話紀錄")),
                 QuickReplyButton(action=MessageAction(label="其他功能", text="其他功能"))
             ]))
+            
         case "清空對話紀錄":
             redis_handler.refresh_memory(user_id)
             response = TextSendMessage(text="對話紀錄已清空")
