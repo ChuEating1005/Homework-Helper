@@ -17,8 +17,10 @@ from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_AP
 #初始化handler
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 calandar = CalandarUtils()
+
 # 必須放上自己的Channel Access Token
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
+
 # 必須放上自己的Channel Secret
 handler = WebhookHandler(LINEBOT_HANDLER)
 
@@ -44,7 +46,7 @@ def callback():
     return 'OK'
 
 
-#訊息傳遞區塊
+# 訊息傳遞區塊
 # 處理file message
 @handler.add(MessageEvent, message=FileMessage)
 def handle_message(event):
@@ -159,7 +161,6 @@ def handle_text_message(event):
             
         case _ if input_text.startswith("建立Notion"):
             notion_handler = Notion_handler(user_id)
-<<<<<<< HEAD
             _, year, month, day, hour, minute, hw, text = input_text.split('\n')
             year = year[len("year:"):]
             month = month[len("month:"):]
@@ -193,11 +194,6 @@ def handle_text_message(event):
                 erase_origin = True
             notion_handler.update_page(page_id=page_id, data=data_format, text=text, erase_origin=erase_origin)
             response = TextSendMessage(text="更新完成")
-        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
-            response = TextSendMessage(text="尚未完成服務")
-=======
-            notion_handler.notion_test()
-            response = TextSendMessage(text="建立完成")
         case "日曆連結":
             response = TextSendMessage(text="https://calendar.google.com/calendar/")
         case "估計作業耗時":
@@ -238,7 +234,6 @@ def handle_text_message(event):
             except Exception as e:
                 response = TextSendMessage(text=f"上傳失敗: {str(e)}")
             
->>>>>>> origin/test_bot
         case _:
             try:
                 # 處理對話 回傳openAI的回應
