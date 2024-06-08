@@ -152,18 +152,6 @@ def handle_text_message(event):
                     ]
                 )
             )
-        case "其他功能":
-            response = TextSendMessage("選擇服務項目",
-            quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="清空對話紀錄", text="清空對話紀錄")),
-                QuickReplyButton(action=MessageAction(label="其他功能", text="其他功能"))
-            ]))
-            
-        case "清空對話紀錄":
-            pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
-            openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
-            openaiHandler.refresh_memory(user_id)
-            response = TextSendMessage(text="對話紀錄已清空")
             
         case _ if input_text.startswith("NotionAPI:"):
             redis_handler.set_notion_api_key(user_id, input_text[len("NotionAPI:"):])
@@ -185,7 +173,6 @@ def handle_text_message(event):
             data_format = notion_handler.data_format(hw, date)
             notion_handler.create_page(data_format, text)
             response = TextSendMessage(text="Notion已建立")
-            
         case _ if input_text.startswith("更新Notion已存在頁面"):
             notion_handler = Notion_handler(user_id)
             _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
@@ -207,7 +194,59 @@ def handle_text_message(event):
                 erase_origin = True
             notion_handler.update_page(page_id=page_id, data=data_format, text=text, erase_origin=erase_origin)
             response = TextSendMessage(text="更新完成")
-        
+        case "日曆連結":
+            response = TextSendMessage(text="https://calendar.google.com/calendar/")
+        case "估計作業耗時":
+            response = TemplateSendMessage(
+                alt_text='估計',
+                template=ButtonsTemplate(
+                    title='估計作業耗時',
+                    text='輸入你要估計的作業',
+                    actions=[
+                        PostbackAction(
+                            label='輸入',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='calandar:(要查詢的作業)'
+                        )
+                        
+                    ]
+                )
+            )
+            
+        case _ if input_text.startswith("calandar:"):
+            try:
+                response = TextSendMessage(
+                    text=calandar.estimate_task_time(input_text[len("calandar:"):]),
+                    quick_reply=QuickReply(
+                        items=[
+                            QuickReplyButton(action=MessageAction(label="上傳至日曆", text="上傳至日曆"))
+                        ]
+                    )
+                )
+            except Exception as e:
+                response = TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
+            
+        case "其他功能":
+            response = TextSendMessage("選擇服務項目",
+            quick_reply=QuickReply(items=[
+                QuickReplyButton(action=MessageAction(label="清空對話紀錄", text="清空對話紀錄")),
+                QuickReplyButton(action=MessageAction(label="其他功能", text="其他功能"))
+            ]))
+            
+        case "清空對話紀錄":
+            pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+            openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+            openaiHandler.refresh_memory(user_id)
+            response = TextSendMessage(text="對話紀錄已清空")
+            
+        case "上傳至日曆":
+            try:
+                calandar.add_to_calandar()
+                response = TextSendMessage(text="已上傳")
+            except Exception as e:
+                response = TextSendMessage(text=f"上傳失敗: {str(e)}")
+            
         case _:
             try:
                 # 處理對話 回傳openAI的回應
