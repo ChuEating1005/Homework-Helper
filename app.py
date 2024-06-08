@@ -160,7 +160,9 @@ def handle_text_message(event):
             ]))
             
         case "清空對話紀錄":
-            redis_handler.refresh_memory(user_id)
+            pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+            openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+            openaiHandler.refresh_memory(user_id)
             response = TextSendMessage(text="對話紀錄已清空")
             
         case _ if input_text.startswith("NotionAPI:"):
