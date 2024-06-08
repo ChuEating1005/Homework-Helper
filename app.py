@@ -2,19 +2,22 @@
 #載入LineBot所需要的套件
 from flask import Flask, request, abort
 import os
+import re # for string operation
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
-
+import json
 import tempfile
-
-from openAI_utils import LineBotHandler
-from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME, MODEL_NAME
+from ai_process.openAI_utils import OpenAIHandler
+from redis_get.redis_db import RedisHandler
+from notion_process.NotionAPI import Notion_handler
+from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
 #執行檔案
 app = Flask(__name__)
 
 #初始化handler
-linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME,OPENAI_API_KEY,MODEL_NAME)
+
+redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 
 # 必須放上自己的Channel Access Token
 
@@ -58,8 +61,10 @@ def handle_message(event):
         
     try:
         #丟暫存檔的路徑給處理pdf的function 回傳openAI的回應
-        linebotHandler.upload_pdf(temp_file_path)
-        response = f"PDF file uploaded successfully:{temp_file_path}"
+        pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+        openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+        openaiHandler.upload_pdf(temp_file_path)
+        response = f"PDF file uploaded successfully:"
     except Exception as e:
         response = f"Failed to process the PDF file: {str(e)}"
     finally:
@@ -74,13 +79,37 @@ def handle_text_message(event):
     user_id = event.source.user_id
     # 讀取使用者傳來的訊息
     input_text = event.message.text 
-    
+    response = ""
     match input_text:
+        case "註冊":
+            response = TemplateSendMessage(
+                alt_text='註冊',
+                template=ButtonsTemplate(
+                    title='註冊notion',
+                    text='可以儲存一些資料到db',
+                    actions=[
+                        PostbackAction(
+                            label='我要註冊',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='setDB:(替換成你的英文名字)'
+                        )
+                        
+                    ]
+                )
+            )
+        case _ if input_text.startswith("setDB:"):
+            name = input_text[len("setDB:"):]
+            pinecone_index_name = name +"db"
+            redis_handler.set_db(user_id,name,pinecone_index_name)
+            response = TextSendMessage(text=f"User {name} has been created")
+        case "getName":
+            response = TextSendMessage(text=redis_handler.get_user_name(user_id))
         case "上傳PDF":
             response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
         case "問問題":
             response = TextSendMessage(text="你有啥問題")
-        case "更新google日歷":
+        case "更新日歷":
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
                 QuickReplyButton(action=MessageAction(label="日歷連結", text="日歷連結")),
@@ -89,22 +118,94 @@ def handle_text_message(event):
                 QuickReplyButton(action=MessageAction(label="查看日歷", text="查看日歷"))
             ]))
         case "更新notion":
-            response = TextSendMessage("選擇服務項目",
-            quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="notion連結", text="notion連結")),
-                QuickReplyButton(action=MessageAction(label="新增notion", text="新增notion"))
-            ]))
-        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷" |"notion連結" | "新增notion":
+            response = TemplateSendMessage(
+                alt_text='選擇服務項目',
+                template=ButtonsTemplate(
+                    title='更新notion',
+                    text='選擇服務項目',
+                    actions=[
+                        PostbackAction(
+                            label='輸入Notion API key',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='NotionAPI:'
+                        ),
+                        PostbackAction(
+                            label='輸入database key',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='db:'
+                        ),
+                        PostbackAction(
+                            label='建立Notion',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='建立Notion\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
+                        ),
+                        PostbackAction(
+                            label='更新Notion已存在頁面',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='更新Notion已存在頁面\n是否保存原頁面text:\n要更改的頁面原本名稱:\nyear:\nmonth:\nday:\nhour:\nminute:\nhw:\ntext:'
+                        )
+                    ]
+                )
+            )
+            
+        case _ if input_text.startswith("NotionAPI:"):
+            redis_handler.set_notion_api_key(user_id, input_text[len("NotionAPI:"):])
+            
+        case _ if input_text.startswith("db:"):
+            redis_handler.set_notion_db_id(user_id, input_text[len("db:"):])
+            
+        case _ if input_text.startswith("建立Notion"):
+            notion_handler = Notion_handler(user_id)
+            _, year, month, day, hour, minute, hw, text = input_text.split('\n')
+            year = year[len("year:"):]
+            month = month[len("month:"):]
+            day = day[len("day:"):]
+            hour = hour[len("hour:"):]
+            minute = minute[len("minute:"):]
+            hw = hw[len("hw:"):]
+            text = text[len("text:"):]
+            date = notion_handler.date_format(year, month, day, hour, minute)
+            data_format = notion_handler.data_format(hw, date)
+            notion_handler.create_page(data_format, text)
+            response = TextSendMessage(text="Notion已建立")
+        case _ if input_text.startswith("更新Notion已存在頁面"):
+            notion_handler = Notion_handler(user_id)
+            _, keep, origin_name, year, month, day, hour, minute, hw, text = input_text.split("\n")
+            keep = keep[len("是否保存原頁面text:"):]
+            origin_name = origin_name[len("要更改的頁面原本名稱:"):]
+            year = year[len("year:"):]
+            month = month[len("month:"):]
+            day = day[len("day:"):]
+            hour = hour[len("hour:"):]
+            minute = minute[len("minute:"):]
+            hw = hw[len("hw:"):]
+            text = text[len("text:"):]
+            date = notion_handler.date_format(year, month, day, hour, minute)
+            data_format = notion_handler.data_format(hw, date)
+            page_id = notion_handler.get_page_id_by_name(origin_name)
+            if keep == "是":
+                erase_origin = False
+            else:
+                erase_origin = True
+            notion_handler.update_page(page_id=page_id, data=data_format, text=text, erase_origin=erase_origin)
+            response = TextSendMessage(text="更新完成")
+        case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
             response = TextSendMessage(text="尚未完成服務")
         case _:
             try:
                 # 處理對話 回傳openAI的回應
-                response = TextSendMessage(text=linebotHandler.handle_conversation(input_text))
+                pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+                openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+                response = TextSendMessage(text=openaiHandler.handle_conversation(user_id,input_text))
             except Exception as e:
                 response= TextSendMessage(text=f"Failed to text: {str(e)}")
                 
     #傳結果訊息給使用者
-    line_bot_api.reply_message(event.reply_token,response)
+    line_bot_api.reply_message(event.reply_token, response)
 
 #主程式
 import os
