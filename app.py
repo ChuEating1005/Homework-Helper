@@ -11,20 +11,19 @@ import tempfile
 from ai_process.openAI_utils import OpenAIHandler
 from redis_get.redis_db import RedisHandler
 from notion_process.NotionAPI import Notion_handler
+from calandar_process.CalandarUtils import CalandarUtils
 from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_ENVIRONMENT, MODEL_NAME, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT
-#執行檔案
-app = Flask(__name__)
 
 #初始化handler
-
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
-
+calandar = CalandarUtils()
 # 必須放上自己的Channel Access Token
-
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
-
 handler = WebhookHandler(LINEBOT_HANDLER)
+
+#執行檔案
+app = Flask(__name__)
 
 # 監聽所有來自 /callback 的 Post Request (固定)
 @app.route("/callback", methods=['POST'])
@@ -109,13 +108,13 @@ def handle_text_message(event):
             response = TextSendMessage(text="先將PDF檔上傳到line keep 再透過KEEP傳到聊天室")
         case "問問題":
             response = TextSendMessage(text="你有啥問題")
-        case "更新日歷":
+        case "更新日曆":
+            if not calandar.initialized: 
+                calandar.initialize(user_id, redis_handler.get_user_pinecone_index_name(user_id))
             response = TextSendMessage("選擇服務項目",
             quick_reply=QuickReply(items=[
-                QuickReplyButton(action=MessageAction(label="日歷連結", text="日歷連結")),
-                QuickReplyButton(action=MessageAction(label="新增日歷", text="新增日歷")),
-                QuickReplyButton(action=MessageAction(label="刪除日歷", text="刪除日歷")),
-                QuickReplyButton(action=MessageAction(label="查看日歷", text="查看日歷"))
+                QuickReplyButton(action=MessageAction(label="日曆連結", text="日曆連結")),
+                QuickReplyButton(action=MessageAction(label="估計作業耗時", text="估計作業耗時")),
             ]))
         case "更新notion":
             response = TemplateSendMessage(
@@ -160,6 +159,7 @@ def handle_text_message(event):
             
         case _ if input_text.startswith("建立Notion"):
             notion_handler = Notion_handler(user_id)
+<<<<<<< HEAD
             _, year, month, day, hour, minute, hw, text = input_text.split('\n')
             year = year[len("year:"):]
             month = month[len("month:"):]
@@ -195,6 +195,50 @@ def handle_text_message(event):
             response = TextSendMessage(text="更新完成")
         case "日歷連結" | "新增日歷" | "刪除日歷" | "查看日歷":
             response = TextSendMessage(text="尚未完成服務")
+=======
+            notion_handler.notion_test()
+            response = TextSendMessage(text="建立完成")
+        case "日曆連結":
+            response = TextSendMessage(text="https://calendar.google.com/calendar/")
+        case "估計作業耗時":
+            response = TemplateSendMessage(
+                alt_text='估計',
+                template=ButtonsTemplate(
+                    title='估計作業耗時',
+                    text='輸入你要估計的作業',
+                    actions=[
+                        PostbackAction(
+                            label='輸入',
+                            data='action=startchat',
+                            input_option='openKeyboard',
+                            fill_in_text='calandar:(要查詢的作業)'
+                        )
+                        
+                    ]
+                )
+            )
+            
+        case _ if input_text.startswith("calandar:"):
+            try:
+                response = TextSendMessage(
+                    text=calandar.estimate_task_time(input_text[len("calandar:"):]),
+                    quick_reply=QuickReply(
+                        items=[
+                            QuickReplyButton(action=MessageAction(label="上傳至日曆", text="上傳至日曆"))
+                        ]
+                    )
+                )
+            except Exception as e:
+                response = TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
+            
+        case "上傳至日曆":
+            try:
+                calandar.add_to_calandar()
+                response = TextSendMessage(text="已上傳")
+            except Exception as e:
+                response = TextSendMessage(text=f"上傳失敗: {str(e)}")
+            
+>>>>>>> origin/test_bot
         case _:
             try:
                 # 處理對話 回傳openAI的回應
