@@ -8,5 +8,10 @@ api_key.txt
 .env
 chueat.py
 origin.py
+<<<<<<< HEAD
 calanderAPI
 >>>>>>> 68b6911b4b4b83b098bb2cb3638a3a0a8401fda0
+=======
+calandarAPI/
+__pycache__/
+>>>>>>> 966bd8a304cfd904e432d42e1b5f764c1c54cc19
