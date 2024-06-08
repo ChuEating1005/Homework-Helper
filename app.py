@@ -17,8 +17,10 @@ from config import LINEBOT_API_KEY, LINEBOT_HANDLER, OPENAI_API_KEY, PINECONE_AP
 #初始化handler
 redis_handler = RedisHandler(host=REDIS_HOST,port = REDIS_PORT,password=REDIS_PASSWORD)
 calandar = CalandarUtils()
+
 # 必須放上自己的Channel Access Token
 line_bot_api = LineBotApi(LINEBOT_API_KEY)
+
 # 必須放上自己的Channel Secret
 handler = WebhookHandler(LINEBOT_HANDLER)
 
@@ -44,7 +46,7 @@ def callback():
     return 'OK'
 
 
-#訊息傳遞區塊
+# 訊息傳遞區塊
 # 處理file message
 @handler.add(MessageEvent, message=FileMessage)
 def handle_message(event):
