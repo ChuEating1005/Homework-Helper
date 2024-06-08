@@ -18,7 +18,7 @@ linebotHandler = LineBotHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE
 
 # 必須放上自己的Channel Access Token
 
-line_bot_api = LineBotApi(LINEBOT_API_KEY )
+line_bot_api = LineBotApi(LINEBOT_API_KEY)
 # 必須放上自己的Channel Secret
 
 handler = WebhookHandler(LINEBOT_HANDLER)
