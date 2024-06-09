@@ -1,8 +1,9 @@
 # Homework Helper
 
 ## Overview
-
-TODO
+The Homework Helper is a line bot homework assistant. We allow the user to upload their PDF files, and ask questions about the given PDF.
+The server is connect to gpt-3.5-turbo, and will answer users with the answer the model generated.
+Also, we use RAG architecture to design this LLM application, 
 
 ## Installation
 
