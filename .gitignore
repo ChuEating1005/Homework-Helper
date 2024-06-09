@@ -1,0 +1,12 @@
+<<<<<<< HEAD
+*.env
+*.txt
+venv/
+=======
+api_key.txt
+*.sh
+.env
+chueat.py
+origin.py
+calandarAPI/
+__pycache__/
