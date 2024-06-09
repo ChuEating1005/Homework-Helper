@@ -227,6 +227,19 @@ def handle_text_message(event):
             except Exception as e:
                 response = TextSendMessage(text=f"估計時發生錯誤: {str(e)}")
             
+        case "其他功能":
+            response = TextSendMessage("選擇服務項目",
+            quick_reply=QuickReply(items=[
+                QuickReplyButton(action=MessageAction(label="清空對話紀錄", text="清空對話紀錄")),
+                QuickReplyButton(action=MessageAction(label="其他功能", text="其他功能"))
+            ]))
+            
+        case "清空對話紀錄":
+            pinecone_index_name = redis_handler.get_user_pinecone_index_name(user_id)
+            openaiHandler = OpenAIHandler(PINECONE_API_KEY, PINECONE_ENVIRONMENT, pinecone_index_name,OPENAI_API_KEY,MODEL_NAME)
+            openaiHandler.refresh_memory(user_id)
+            response = TextSendMessage(text="對話紀錄已清空")
+            
         case "上傳至日曆":
             try:
                 calandar.add_to_calandar()

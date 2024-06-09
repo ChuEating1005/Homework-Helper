@@ -172,7 +172,8 @@ class OpenAIHandler:
         })
         return response["answer"]["text"]
 
-    def refresh_memory(self,memory):
+    def refresh_memory(self,user_id):
+        memory = self.create_memory(user_id)
         memory.clear()
         
     def handle_conversation(self,user_id,user_input):
