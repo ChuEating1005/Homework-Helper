@@ -111,3 +111,7 @@ Baseline is the initial response without knowledge database, while dataset do.
 | Q7 | 0.81213 | 0.78414 |
 | Q8 | 0.70715 | x |
 | Average | 0.60517375 | 0.6683614286 |
+
+## Award
+Our team ultimately presented at the AI workshop for the NYCU 112-2 Course, "Introduction to Artificial Intelligence" and won the "Most Creative Group" award.
+![](./Award.jpg)
