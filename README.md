@@ -5,10 +5,8 @@
 The Homework Helper is a line bot homework assistant. We allow the user to upload their PDF files, and ask questions about the given PDFs. The server is connect to gpt-3.5-turbo, and will answer users with the answer the model generated. Also, we use RAG architecture to design this LLM application in order to chat with multiple large PDF files. Another feature of Homework Helper is that it can help you schedule the when to do which task of each homework. And can connect to Google Calendar or Notion to upload those schedule. Tech stack that Homework Helper used includes Python, LangChain, Pinecone, Redis, Linebot, Flask.
 
 ### Architecture
-
-![](https://file.notion.so/f/f/df688f56-097c-417e-97d9-f3d96e83c55c/5b5c6036-f06b-4411-93d6-80e4e1cb49cf/2670ce0d-8472-459b-9948-9dc1faf879ac.png?id=d6a30d6a-1e09-4760-b26a-d57a870d8de4&table=block&spaceId=df688f56-097c-417e-97d9-f3d96e83c55c&expirationTimestamp=1718049600000&signature=CF2D5EyE9-aKkhScN80m2TgIFiPYWc-wPXjK-BidmXY&downloadName=Untitled.png)
-![](https://file.notion.so/f/f/df688f56-097c-417e-97d9-f3d96e83c55c/b125a0bb-32f0-4903-94c5-1f27b67592c6/technology_architecture.png?id=c838074a-b227-4588-9520-bad1bce41d1e&table=block&spaceId=df688f56-097c-417e-97d9-f3d96e83c55c&expirationTimestamp=1718049600000&signature=AXtYOe1ZdlNop7aJeKb_QN3--l8ZxleNTHTGN53os7U&downloadName=technology+architecture.png)
-
+![arch](./Architecture.png)
+![workflow](./RAG_Workflow.png)
 ## Installation
 
 ### Python Environment
