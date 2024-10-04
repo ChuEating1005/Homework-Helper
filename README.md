@@ -1,8 +1,10 @@
 # Homework Helper
 
 ## Overview
-
 The Homework Helper is a line bot homework assistant. We allow the user to upload their PDF files, and ask questions about the given PDFs. The server is connect to gpt-3.5-turbo, and will answer users with the answer the model generated. Also, we use RAG architecture to design this LLM application in order to chat with multiple large PDF files. Another feature of Homework Helper is that it can help you schedule the when to do which task of each homework. And can connect to Google Calendar or Notion to upload those schedule. Tech stack that Homework Helper used includes Python, LangChain, Pinecone, Redis, Linebot, Flask.
+
+### Slides
+Our presentation slides is available [here](https://www.canva.com/design/DAGHpu3fdEU/sRLo8Ic4eoEXkRZgUhkYoQ/edit?utm_content=DAGHpu3fdEU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
 
 ### Application Architecture
 ![arch](./Architecture.png)
@@ -24,22 +26,24 @@ pip install -r requirements.txt
 
 Setup the following environment variables:
 
-- PINECONE_API_KEY
-- PINECONE_ENVIRONMENT
-- OPENAI_API_KEY
-- LINE_BOT_API_KEY
-- LINE_BOT_HANDLER
-- REDIS_HOST
-- REDIS_PASSWORD
-- REDIS_PORT
-- REDIS_URL
-- CLIENT_ID
-- PROJECT_ID
-- AUTH_URI
-- TOKEN_URI
-- AUTH_PROVIDER_URI
-- CLIENT_SECRET
-- REDIRECT_URIS
+```
+PINECONE_API_KEY
+PINECONE_ENVIRONMENT
+OPENAI_API_KEY
+LINE_BOT_API_KEY
+LINE_BOT_HANDLER
+REDIS_HOST
+REDIS_PASSWORD
+REDIS_PORT
+REDIS_URL
+CLIENT_ID
+PROJECT_ID
+AUTH_URI
+TOKEN_URI
+AUTH_PROVIDER_URI
+CLIENT_SECRET
+REDIRECT_URIS
+```
 
 ## Usage
 
