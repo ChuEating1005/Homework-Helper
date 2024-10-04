@@ -4,9 +4,12 @@
 
 The Homework Helper is a line bot homework assistant. We allow the user to upload their PDF files, and ask questions about the given PDFs. The server is connect to gpt-3.5-turbo, and will answer users with the answer the model generated. Also, we use RAG architecture to design this LLM application in order to chat with multiple large PDF files. Another feature of Homework Helper is that it can help you schedule the when to do which task of each homework. And can connect to Google Calendar or Notion to upload those schedule. Tech stack that Homework Helper used includes Python, LangChain, Pinecone, Redis, Linebot, Flask.
 
-### Architecture
+### Application Architecture
 ![arch](./Architecture.png)
+
+### RAG Workflow
 ![workflow](./RAG_Workflow.png)
+
 ## Installation
 
 ### Python Environment
